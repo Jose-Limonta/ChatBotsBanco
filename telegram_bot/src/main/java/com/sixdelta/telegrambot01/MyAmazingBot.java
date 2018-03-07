@@ -133,7 +133,7 @@ public class MyAmazingBot extends TelegramLongPollingBot {
 				List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
 				List<InlineKeyboardButton> rowInline = new ArrayList<>();
 				rowInline.add(new InlineKeyboardButton()
-					.setText("Let's wreck!").setCallbackData("wreck"));
+					.setText("Vamo a alocarno").setCallbackData("wreck"));
 				// Set the keyboard to the markup
 				rowsInline.add(rowInline);
 				// Add it to the message

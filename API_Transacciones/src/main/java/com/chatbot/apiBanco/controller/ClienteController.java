@@ -23,4 +23,11 @@ public class ClienteController {
          Customer response = API.customers().create(input.toCustomer());
          return new ClienteOut(response);
     }
+
+    @RequestMapping(value = "/cliente/actualiza",  method = RequestMethod.POST)
+    @ResponseBody
+    public ClienteOut actualiza(@RequestBody  Cliente input) throws OpenpayServiceException, ServiceUnavailableException {
+        Customer response = API.customers().update(input.toCustomer());
+        return new ClienteOut(response);
+    }
 }

@@ -1,5 +1,5 @@
 
-package com.chatbot.apiBanco.model.cliente;
+package com.chatbot.apiBanco.model.Cliente;
 
 import java.util.HashMap;
 import java.util.Map;

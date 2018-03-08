@@ -2,6 +2,7 @@ package com.chatbot.apiBanco.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -9,16 +10,28 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
+import java.nio.charset.Charset;
+
 public class ApiRequest {
 
     private static final Logger log = LoggerFactory.getLogger(ApiRequest.class);
     private ObjectMapper mapper = new ObjectMapper();
-    private HttpHeaders headers = new HttpHeaders();
+    private HttpHeaders headers;
     private RestTemplate restTemplate = new RestTemplate();
     private HttpEntity<String> entity;
 
+    private HttpHeaders createHeaders(String username, String password){
+        return new HttpHeaders() {{
+            String auth = username + ":" + password;
+            byte[] encodedAuth = Base64.encodeBase64(
+                    auth.getBytes(Charset.forName("US-ASCII")) );
+            String authHeader = "Basic " + new String( encodedAuth );
+            set( "Authorization", authHeader );
+        }};
+    }
     //constructor
     public ApiRequest() {
+        this.headers = createHeaders("sk_e4ab3db394a247c8a0eee7099e62ff5b", "");
         this.headers.setContentType(MediaType.APPLICATION_JSON);
     }
 

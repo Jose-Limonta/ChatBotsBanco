@@ -15,6 +15,12 @@ public class ClienteOut {
         this.status = customer.getStatus();
     }
 
+    public ClienteOut(){
+        this.id = "";
+        this.creation_date = "";
+        this.status = "Success";
+    }
+
     public String getStatus() {
         return status;
     }

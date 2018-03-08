@@ -24,6 +24,9 @@ import mx.openpay.client.Customer;
 })
 public class Cliente {
 
+    @JsonProperty("id")
+    private String id;
+
     @JsonProperty("name")
     private String name;
     @JsonProperty("last_name")
@@ -38,8 +41,17 @@ public class Cliente {
     private String status;
     @JsonProperty("balance")
     private Double balance;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     @JsonProperty("address")
-    private com.chatbot.apiBanco.model.cliente.Address address;
+    private com.chatbot.apiBanco.model.Cliente.Address address;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -114,12 +126,12 @@ public class Cliente {
     }
 
     @JsonProperty("address")
-    public com.chatbot.apiBanco.model.cliente.Address getAddress() {
+    public com.chatbot.apiBanco.model.Cliente.Address getAddress() {
         return address;
     }
 
     @JsonProperty("address")
-    public void setAddress(com.chatbot.apiBanco.model.cliente.Address address) {
+    public void setAddress(com.chatbot.apiBanco.model.Cliente.Address address) {
         this.address = address;
     }
 

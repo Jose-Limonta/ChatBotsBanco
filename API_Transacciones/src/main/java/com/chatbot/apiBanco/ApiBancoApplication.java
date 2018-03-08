@@ -13,7 +13,7 @@ public class ApiBancoApplication extends WebSecurityConfigurerAdapter {
 		http
 				.antMatcher("/**")
 				.authorizeRequests()
-				.antMatchers("/**","/test**", "/cliente/crea**")
+				.antMatchers("/**","/test**", "/cliente/crea**", "/cliente/actualiza**")
 				.permitAll()
 				.anyRequest()
 				.authenticated();

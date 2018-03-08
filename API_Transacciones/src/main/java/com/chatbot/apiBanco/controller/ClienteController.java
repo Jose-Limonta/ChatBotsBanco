@@ -21,8 +21,6 @@ public class ClienteController {
     @ResponseBody
     public ClienteOut alta(@RequestBody  Cliente input) throws OpenpayServiceException, ServiceUnavailableException {
          Customer response = API.customers().create(input.toCustomer());
-         ClienteOut out = new ClienteOut(response);
-
-
+         return new ClienteOut(response);
     }
 }

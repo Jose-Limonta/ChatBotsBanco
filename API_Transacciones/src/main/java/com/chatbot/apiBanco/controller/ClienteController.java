@@ -2,7 +2,7 @@ package com.chatbot.apiBanco.controller;
 
 
 import com.chatbot.apiBanco.model.Cliente.ClienteOut;
-import com.chatbot.apiBanco.model.cliente.Cliente;
+import com.chatbot.apiBanco.model.Cliente.Cliente;
 import mx.openpay.client.Customer;
 import mx.openpay.client.core.OpenpayAPI;
 import mx.openpay.client.exceptions.OpenpayServiceException;

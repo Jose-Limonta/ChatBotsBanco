@@ -9,6 +9,16 @@ public class Range {
     private Date inicio;
     private Date fin;
 
+    private String customerId;
+
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
+    }
+
     public Date getInicio() {
         return inicio;
     }

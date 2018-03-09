@@ -1,11 +1,9 @@
 package com.chatbot.apiBanco.controller;
 
 
-import com.chatbot.apiBanco.model.cliente.ClienteOut;
 import com.chatbot.apiBanco.model.cliente.Range;
 import com.chatbot.apiBanco.model.cuenta.Cuenta;
 import mx.openpay.client.BankAccount;
-import mx.openpay.client.Customer;
 import mx.openpay.client.core.OpenpayAPI;
 import mx.openpay.client.exceptions.OpenpayServiceException;
 import mx.openpay.client.exceptions.ServiceUnavailableException;
@@ -28,8 +26,8 @@ public class CuentaController {
     @RequestMapping(value = "/cuenta",  method = RequestMethod.POST)
     @ResponseBody
     public BankAccount altaCuenta(@RequestBody  Cuenta input) throws OpenpayServiceException, ServiceUnavailableException {
-         Cuenta response = API.bankAccounts().create(input.toAccount(),  );
-         return new BankAccount();
+        BankAccount response = API.bankAccounts().create( input.getCustomerId() ,input.toAccount());
+        return response;
     }
 
     @RequestMapping(value = "/cuenta/{customerId}/{accountId}", method = RequestMethod.GET)

@@ -20,6 +20,9 @@ import mx.openpay.client.BankAccount;
 })
 public class Cuenta {
 
+    @JsonProperty("customerId")
+    private String customerId;
+
 	@JsonProperty("clabe")
 	private String clabe;
 	@JsonProperty("alias")
@@ -27,7 +30,15 @@ public class Cuenta {
 	@JsonProperty("holder_name")
 	private String holderName;
 	@JsonIgnore
-	private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(String id) {
+        this.customerId = id;
+    }
 
     @JsonProperty("clabe")
     public String getClabe() {

@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 public class TarjetaController {
-    /*
+
     private static final Logger log = LoggerFactory.getLogger(TarjetaController.class);
     private static final OpenpayAPI API = new OpenpayAPI("https://sandbox-api.openpay.mx", "sk_e4ab3db394a247c8a0eee7099e62ff5b", "moiatycvyhadtev60q8x");
     private final Calendar dateGte = Calendar.getInstance();
@@ -27,51 +27,35 @@ public class TarjetaController {
     @ResponseBody
     public Card creaTarjeta(@RequestBody Tarjeta input) throws OpenpayServiceException, ServiceUnavailableException {
 
-        /*
-            Card request = new Card();
-            request.holderName("Juan Perez Ramirez");
-            request.cardNumber("4111111111111111");
-            request.cvv2("110");
-            request.expirationMonth(12);
-            request.expirationYear(20);
-            request.deviceSessionId("kR1MiQhz2otdIuUlQkbEyitIqVMiI16f");
-            Address address = new Address();
-            address.city("Queretaro");
-            address.countryCode("10");
-            address.state("Queretaro");
-            address.postalCode("79125");
-            address.line1("Av. Pie de la cuesta #12");
-            address.line2("Desarrollo San Pablo");
-            address.line3("Qro. Qro.");
-            request.address(address);
-
-        request = API.cards().create("a9pvykxz4g5rg0fplze0", request);
-        return new ;
+        Card response = API.cards().create(input.getCustomerId(), input.toCard());
+       
+        return response;
     }
 
-    @RequestMapping(value = "/tarjeta",  method = RequestMethod.PATCH)
+
+    @RequestMapping(value = "/tarjeta/{customerId}/{id}",  method = RequestMethod.GET)
     @ResponseBody
-    public  actualizaTarjeta(@RequestBody Tarjeta input) throws OpenpayServiceException, ServiceUnavailableException {
-         response = input.();
-        response.setId(input.getId());
-        response = ;
-        return new ClienteOut(response);
+    public Card getTarjeta(@PathVariable  String id, @PathVariable String customerId) throws OpenpayServiceException, ServiceUnavailableException {
+        Card card = API.cards().get(customerId, id);
+        return card;
     }
 
-    @RequestMapping(value = "/tarjeta/{id}",  method = RequestMethod.GET)
+    @RequestMapping(value = "/tarjeta/{customerId}/{id}",  method = RequestMethod.DELETE)
     @ResponseBody
-    public  getTarjeta(@PathVariable  String id) throws OpenpayServiceException, ServiceUnavailableException {
-        return  ;
+    public boolean deleteTarjeta(@PathVariable  String id, @PathVariable String customerId) {
+        try {
+            API.cards().delete(customerId ,id);
+        }catch (OpenpayServiceException e){
+            //TODO
+            return false;
+        }catch (ServiceUnavailableException e ){
+            //TODO
+            return false;
+        }
+        return true ;
     }
 
-    @RequestMapping(value = "/tarjeta/{id}",  method = RequestMethod.DELETE)
-    @ResponseBody
-    public  deletetarjeta(@PathVariable  String id) throws OpenpayServiceException, ServiceUnavailableException {
-
-        return new ();
-    }
-
-    @RequestMapping(value = "/tarjeta",  method = RequestMethod.POST)
+    @RequestMapping(value = "/tarjetas",  method = RequestMethod.POST)
     @ResponseBody
     public List<Card>  getTarjetas(@RequestBody Range dates) throws OpenpayServiceException, ServiceUnavailableException {
         dateGte.set(dates.getInicio().getAnio(), dates.getInicio().getMes(), dates.getInicio().getDia(), dates.getInicio().getHora(), dates.getInicio().getMinuto(), dates.getInicio().getSegundo());
@@ -82,8 +66,8 @@ public class TarjetaController {
         request.creationLte(dateLte.getTime());
         request.offset(0);
 
-        return  API.cards().list("a9pvykxz4g5rg0fplze0", request);
+        return  API.cards().list(dates.getCustomerId(), request);
     }
-    */
+
 
 }

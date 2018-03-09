@@ -1,5 +1,5 @@
 
-package com.chatbot.apiBanco.model.Cliente;
+package com.chatbot.apiBanco.model.cliente;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,7 +51,7 @@ public class Cliente {
     }
 
     @JsonProperty("address")
-    private com.chatbot.apiBanco.model.Cliente.Address address;
+    private com.chatbot.apiBanco.model.cliente.Address address;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -126,12 +126,12 @@ public class Cliente {
     }
 
     @JsonProperty("address")
-    public com.chatbot.apiBanco.model.Cliente.Address getAddress() {
+    public com.chatbot.apiBanco.model.cliente.Address getAddress() {
         return address;
     }
 
     @JsonProperty("address")
-    public void setAddress(com.chatbot.apiBanco.model.Cliente.Address address) {
+    public void setAddress(com.chatbot.apiBanco.model.cliente.Address address) {
         this.address = address;
     }
 

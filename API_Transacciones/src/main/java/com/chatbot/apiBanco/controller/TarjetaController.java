@@ -1,9 +1,9 @@
 package com.chatbot.apiBanco.controller;
 
-import com.chatbot.apiBanco.model.Cliente.Cliente;
-import com.chatbot.apiBanco.model.Cliente.ClienteOut;
-import com.chatbot.apiBanco.model.Cliente.Range;
-import mx.openpay.client.Customer;
+import com.chatbot.apiBanco.model.cliente.ClienteOut;
+import com.chatbot.apiBanco.model.cliente.Range;
+import com.chatbot.apiBanco.model.tarjeta.Tarjeta;
+import mx.openpay.client.Card;
 import mx.openpay.client.core.OpenpayAPI;
 import mx.openpay.client.exceptions.OpenpayServiceException;
 import mx.openpay.client.exceptions.ServiceUnavailableException;
@@ -16,45 +16,64 @@ import java.util.Calendar;
 import java.util.List;
 
 @RestController
-public class CuentaController {
-
-    private static final Logger log = LoggerFactory.getLogger(CuentaController.class);
+public class TarjetaController {
+    /*
+    private static final Logger log = LoggerFactory.getLogger(TarjetaController.class);
     private static final OpenpayAPI API = new OpenpayAPI("https://sandbox-api.openpay.mx", "sk_e4ab3db394a247c8a0eee7099e62ff5b", "moiatycvyhadtev60q8x");
     private final Calendar dateGte = Calendar.getInstance();
     private final Calendar dateLte = Calendar.getInstance();
 
-    @RequestMapping(value = "/cuenta",  method = RequestMethod.POST)
+    @RequestMapping(value = "/tarjeta",  method = RequestMethod.POST)
     @ResponseBody
-    public ClienteOut altaCliente(@RequestBody Cliente input) throws OpenpayServiceException, ServiceUnavailableException {
-        Customer response = API.customers().create(input.toCustomer());
-        return new ClienteOut(response);
+    public Card creaTarjeta(@RequestBody Tarjeta input) throws OpenpayServiceException, ServiceUnavailableException {
+
+        /*
+            Card request = new Card();
+            request.holderName("Juan Perez Ramirez");
+            request.cardNumber("4111111111111111");
+            request.cvv2("110");
+            request.expirationMonth(12);
+            request.expirationYear(20);
+            request.deviceSessionId("kR1MiQhz2otdIuUlQkbEyitIqVMiI16f");
+            Address address = new Address();
+            address.city("Queretaro");
+            address.countryCode("10");
+            address.state("Queretaro");
+            address.postalCode("79125");
+            address.line1("Av. Pie de la cuesta #12");
+            address.line2("Desarrollo San Pablo");
+            address.line3("Qro. Qro.");
+            request.address(address);
+
+        request = API.cards().create("a9pvykxz4g5rg0fplze0", request);
+        return new ;
     }
 
-    @RequestMapping(value = "/cuenta",  method = RequestMethod.PATCH)
+    @RequestMapping(value = "/tarjeta",  method = RequestMethod.PATCH)
     @ResponseBody
-    public ClienteOut actualizaCliente(@RequestBody  Cliente input) throws OpenpayServiceException, ServiceUnavailableException {
-        Customer response = input.toCustomer();
+    public  actualizaTarjeta(@RequestBody Tarjeta input) throws OpenpayServiceException, ServiceUnavailableException {
+         response = input.();
         response.setId(input.getId());
-        response = API.customers().update(response);
+        response = ;
         return new ClienteOut(response);
     }
 
-    @RequestMapping(value = "/cuenta/{id}",  method = RequestMethod.GET)
+    @RequestMapping(value = "/tarjeta/{id}",  method = RequestMethod.GET)
     @ResponseBody
-    public Customer getCliente(@PathVariable  String id) throws OpenpayServiceException, ServiceUnavailableException {
-        return  API.customers().get(id);
+    public  getTarjeta(@PathVariable  String id) throws OpenpayServiceException, ServiceUnavailableException {
+        return  ;
     }
 
-    @RequestMapping(value = "/cliente/{id}",  method = RequestMethod.DELETE)
+    @RequestMapping(value = "/tarjeta/{id}",  method = RequestMethod.DELETE)
     @ResponseBody
-    public ClienteOut deleteCliente(@PathVariable  String id) throws OpenpayServiceException, ServiceUnavailableException {
-        API.customers().delete(id);
-        return new ClienteOut();
+    public  deletetarjeta(@PathVariable  String id) throws OpenpayServiceException, ServiceUnavailableException {
+
+        return new ();
     }
 
-    @RequestMapping(value = "/clientes",  method = RequestMethod.POST)
+    @RequestMapping(value = "/tarjeta",  method = RequestMethod.POST)
     @ResponseBody
-    public List<Customer> getClientes(@RequestBody Range dates) throws OpenpayServiceException, ServiceUnavailableException {
+    public List<Card>  getTarjetas(@RequestBody Range dates) throws OpenpayServiceException, ServiceUnavailableException {
         dateGte.set(dates.getInicio().getAnio(), dates.getInicio().getMes(), dates.getInicio().getDia(), dates.getInicio().getHora(), dates.getInicio().getMinuto(), dates.getInicio().getSegundo());
         dateLte.set(dates.getFin().getAnio(), dates.getFin().getMes(), dates.getFin().getDia(), dates.getFin().getHora(), dates.getFin().getMinuto(), dates.getFin().getSegundo());
 
@@ -63,7 +82,8 @@ public class CuentaController {
         request.creationLte(dateLte.getTime());
         request.offset(0);
 
-        return  API.customers().list(request);
+        return  API.cards().list("a9pvykxz4g5rg0fplze0", request);
     }
+    */
 
 }

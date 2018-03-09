@@ -1,9 +1,9 @@
 package com.chatbot.apiBanco.controller;
 
 
-import com.chatbot.apiBanco.model.Cliente.ClienteOut;
-import com.chatbot.apiBanco.model.Cliente.Cliente;
-import com.chatbot.apiBanco.model.Cliente.Range;
+import com.chatbot.apiBanco.model.cliente.ClienteOut;
+import com.chatbot.apiBanco.model.cliente.Cliente;
+import com.chatbot.apiBanco.model.cliente.Range;
 import mx.openpay.client.Customer;
 import mx.openpay.client.core.OpenpayAPI;
 import mx.openpay.client.exceptions.OpenpayServiceException;
@@ -63,7 +63,6 @@ public class ClienteController {
         request.creationGte(dateGte.getTime());
         request.creationLte(dateLte.getTime());
         request.offset(0);
-        request.limit(100);
 
         return  API.customers().list(request);
     }

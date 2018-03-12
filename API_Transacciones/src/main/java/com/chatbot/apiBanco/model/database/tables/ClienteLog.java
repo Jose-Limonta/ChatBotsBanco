@@ -1,6 +1,9 @@
 package com.chatbot.apiBanco.model.database.tables;
 
 import javax.persistence.*;
+
+import com.chatbot.apiBanco.model.cliente.Cliente;
+
 import java.util.List;
 
 @Entity
@@ -55,5 +58,12 @@ public class ClienteLog {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public ClienteLog (Cliente cli){
+        this.email = cli.getEmail();
+        this.nombre = cli.getName() + " " + cli.getLastName();
+        this.Token = cli.getId();
+        this.idBanco = cli.getExternalId();
     }
 }

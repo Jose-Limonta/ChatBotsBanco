@@ -12,6 +12,7 @@ import mx.openpay.client.utils.SearchParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
+import com.chatbot.apiBanco.model.error.Error;;
 
 import java.util.Calendar;
 import java.util.List;
@@ -65,5 +66,28 @@ public class ClienteController {
         request.offset(0);
 
         return  API.customers().list(request);
+    }
+
+    @ExceptionHandler({ OpenpayServiceException.class })
+    @ResponseBody
+    public Error handleException(OpenpayServiceException ex) {
+        //
+        Error e = new Error();
+        e.setAdditionalProperty("Source", "Fallo de Operacion Cliente");
+        e.setErrorCode(ex.getErrorCode());
+        e.setHttpCode(ex.getHttpCode());
+        e.setDescription(ex.getDescription());  
+        return e;
+    }
+
+    @ExceptionHandler({ ServiceUnavailableException.class })
+    @ResponseBody
+    public Error handleServiceException(ServiceUnavailableException ex) {
+        //
+        Error e = new Error();
+        e.setAdditionalProperty("Source", "Servicio no disponible");
+        e.setAdditionalProperty("Cause", ex.getCause());
+        e.setDescription(ex.getMessage() );  
+        return e;
     }
 }

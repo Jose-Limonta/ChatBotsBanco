@@ -14,7 +14,7 @@ public class Transaccion {
 
     private String customerId;
 
-    public String getCustomerId() { 
+    public String getCustomerId() {
         return customerId;
     }
 

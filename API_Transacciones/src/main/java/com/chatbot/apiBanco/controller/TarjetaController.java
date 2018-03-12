@@ -1,6 +1,5 @@
 package com.chatbot.apiBanco.controller;
 
-import com.chatbot.apiBanco.model.cliente.ClienteOut;
 import com.chatbot.apiBanco.model.cliente.Range;
 import com.chatbot.apiBanco.model.tarjeta.Tarjeta;
 import mx.openpay.client.Card;
@@ -11,6 +10,8 @@ import mx.openpay.client.utils.SearchParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
+import com.chatbot.apiBanco.model.error.Error;;
+
 
 import java.util.Calendar;
 import java.util.List;
@@ -28,7 +29,6 @@ public class TarjetaController {
     public Card creaTarjeta(@RequestBody Tarjeta input) throws OpenpayServiceException, ServiceUnavailableException {
 
         Card response = API.cards().create(input.getCustomerId(), input.toCard());
-       
         return response;
     }
 
@@ -36,22 +36,16 @@ public class TarjetaController {
     @RequestMapping(value = "/tarjeta/{customerId}/{id}",  method = RequestMethod.GET)
     @ResponseBody
     public Card getTarjeta(@PathVariable  String id, @PathVariable String customerId) throws OpenpayServiceException, ServiceUnavailableException {
+
         Card card = API.cards().get(customerId, id);
         return card;
     }
 
     @RequestMapping(value = "/tarjeta/{customerId}/{id}",  method = RequestMethod.DELETE)
     @ResponseBody
-    public boolean deleteTarjeta(@PathVariable  String id, @PathVariable String customerId) {
-        try {
-            API.cards().delete(customerId ,id);
-        }catch (OpenpayServiceException e){
-            //TODO
-            return false;
-        }catch (ServiceUnavailableException e ){
-            //TODO
-            return false;
-        }
+    public boolean deleteTarjeta(@PathVariable  String id, @PathVariable String customerId) throws OpenpayServiceException, ServiceUnavailableException {
+
+        API.cards().delete(customerId ,id);
         return true ;
     }
 
@@ -69,5 +63,26 @@ public class TarjetaController {
         return  API.cards().list(dates.getCustomerId(), request);
     }
 
+    @ExceptionHandler({ OpenpayServiceException.class })
+    @ResponseBody
+    public Error handleException(OpenpayServiceException ex) {
+        //
+        Error e = new Error();
+        e.setAdditionalProperty("Source", "Fallo de Operacion TarjetaLog");
+        e.setErrorCode(ex.getErrorCode());
+        e.setHttpCode(ex.getHttpCode());
+        e.setDescription(ex.getDescription());  
+        return e;
+    }
 
+    @ExceptionHandler({ ServiceUnavailableException.class })
+    @ResponseBody
+    public Error handleServiceException(ServiceUnavailableException ex) {
+        //
+        Error e = new Error();
+        e.setAdditionalProperty("Source", "Servicio no disponible");
+        e.setAdditionalProperty("Cause", ex.getCause());
+        e.setDescription(ex.getMessage() );  
+        return e;
+    }
 }

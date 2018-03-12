@@ -199,13 +199,13 @@ public class MyAmazingBot extends TelegramLongPollingBot {
 				} catch (TelegramApiException e) {
 					e.printStackTrace();
 		        	}
-			} else if(message_text.equals("/buy")){
+			} else if(message_text.equals("/kelpo")){
 				LabeledPrice kelpoPrice = new LabeledPrice();
 				kelpoPrice.setLabel("1");
 				kelpoPrice.setAmount(2500);
 				List<LabeledPrice> kelpoPrices = new ArrayList<LabeledPrice>();
 				kelpoPrices.add(kelpoPrice);
-				SendInvoice invc = new SendInvoice()
+				SendInvoice invcKelpo = new SendInvoice()
 					.setChatId(update.getMessage().getChatId().intValue())
 					.setTitle("Kelpo 1 pz")
 					.setDescription("Cereal Kelpo, con el que posiblemente te digan: Oye, anoche te vi en televisión!")
@@ -219,7 +219,31 @@ public class MyAmazingBot extends TelegramLongPollingBot {
 					.setNeedPhoneNumber(true)
 					.setNeedEmail(true);
 				try{
-					sendInvoice(invc);
+					sendInvoice(invcKelpo);
+				} catch (TelegramApiException e) {
+					e.printStackTrace();
+				}
+			} else if(message_text.equals("/spatula")){
+				LabeledPrice spatulaPrice = new LabeledPrice();
+				spatulaPrice.setLabel("1");
+				spatulaPrice.setAmount(49999);
+				List<LabeledPrice> spatulaPrices = new ArrayList<LabeledPrice>();
+				spatulaPrices.add(spatulaPrice);
+				SendInvoice invcSpatula = new SendInvoice()
+					.setChatId(update.getMessage().getChatId().intValue())
+					.setTitle("Espátula Hidrodinámica 1 pz")
+					.setDescription("La espátula hidrodinámica con accesorios sintéticos y palanca turbo que seguramente tu jefe cangrejo avaro te pidió.")
+					.setPhotoUrl("https://vignette.wikia.nocookie.net/spongebob/images/7/70/Hydrodynamic_spat.jpg")
+					.setPayload("/buy")
+					.setProviderToken("284685063:TEST:Y2Q5NmMwNjY0NDRh")
+					.setStartParameter("pay")
+					.setCurrency("MXN")
+					.setPrices(spatulaPrices)
+					.setNeedName(true)
+					.setNeedPhoneNumber(true)
+					.setNeedEmail(true);
+				try{
+					sendInvoice(invcSpatula);
 				} catch (TelegramApiException e) {
 					e.printStackTrace();
 				}

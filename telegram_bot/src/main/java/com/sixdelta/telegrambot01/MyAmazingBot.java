@@ -1,11 +1,15 @@
 package com.sixdelta.telegrambot01;
 
 import com.vdurmont.emoji.EmojiParser;
+import org.telegram.telegrambots.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.api.methods.AnswerPreCheckoutQuery;
 import org.telegram.telegrambots.api.methods.send.SendDocument;
+import org.telegram.telegrambots.api.methods.send.SendInvoice;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.api.objects.Document;
+import org.telegram.telegrambots.api.objects.payments.LabeledPrice;
 import org.telegram.telegrambots.api.objects.PhotoSize;
 import org.telegram.telegrambots.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -126,6 +130,9 @@ public class MyAmazingBot extends TelegramLongPollingBot {
 					e.printStackTrace();
 				}
 			} else if (message_text.equals("Row 2 Button 1")) {
+				SendDocument dcm = new SendDocument()
+					.setChatId(chat_id)
+					.setDocument("CgADAQADLQADIJv4REsX-R6cKYWQAg");
 				SendMessage message = new SendMessage() // Create a message object object
 					.setChatId(chat_id)
 					.setText("Uh-oh...");
@@ -133,13 +140,14 @@ public class MyAmazingBot extends TelegramLongPollingBot {
 				List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
 				List<InlineKeyboardButton> rowInline = new ArrayList<>();
 				rowInline.add(new InlineKeyboardButton()
-					.setText("Vamo a alocarno").setCallbackData("wreck"));
+					.setText("Let's wreck!").setCallbackData("wreck"));
 				// Set the keyboard to the markup
 				rowsInline.add(rowInline);
 				// Add it to the message
 				markupInline.setKeyboard(rowsInline);
 				message.setReplyMarkup(markupInline);
 				try {
+					sendDocument(dcm);
 					execute(message); // Sending our message object to user
 				} catch (TelegramApiException e) {
 					e.printStackTrace();
@@ -191,6 +199,30 @@ public class MyAmazingBot extends TelegramLongPollingBot {
 				} catch (TelegramApiException e) {
 					e.printStackTrace();
 		        	}
+			} else if(message_text.equals("/buy")){
+				LabeledPrice kelpoPrice = new LabeledPrice();
+				kelpoPrice.setLabel("1");
+				kelpoPrice.setAmount(2500);
+				List<LabeledPrice> kelpoPrices = new ArrayList<LabeledPrice>();
+				kelpoPrices.add(kelpoPrice);
+				SendInvoice invc = new SendInvoice()
+					.setChatId(update.getMessage().getChatId().intValue())
+					.setTitle("Kelpo 1 pz")
+					.setDescription("Cereal Kelpo, con el que posiblemente te digan: Oye, anoche te vi en televisión!")
+					.setPhotoUrl("https://yt3.ggpht.com/-XIGMD9e4pm8/AAAAAAAAAAI/AAAAAAAAAAA/wTNR7Uakb0A/s288-mo-c-c0xffffffff-rj-k-no/photo.jpg")
+					.setPayload("/buy")
+					.setProviderToken("284685063:TEST:Y2Q5NmMwNjY0NDRh")
+					.setStartParameter("pay")
+					.setCurrency("MXN")
+					.setPrices(kelpoPrices)
+					.setNeedName(true)
+					.setNeedPhoneNumber(true)
+					.setNeedEmail(true);
+				try{
+					sendInvoice(invc);
+				} catch (TelegramApiException e) {
+					e.printStackTrace();
+				}
 			} else {
 				SendMessage message = new SendMessage() // Create a message object object
 					.setChatId(chat_id)
@@ -201,7 +233,26 @@ public class MyAmazingBot extends TelegramLongPollingBot {
 					e.printStackTrace();
 				}
 			}
-		} else if (update.hasCallbackQuery()) {
+		} else if (update.hasPreCheckoutQuery()){
+			AnswerPreCheckoutQuery compraExitosa = new AnswerPreCheckoutQuery();
+			compraExitosa.setPreCheckoutQueryId(update.getPreCheckoutQuery().getId())
+				.setOk(true);
+			try{
+				answerPreCheckoutQuery(compraExitosa);
+			} catch (TelegramApiException e) {
+					e.printStackTrace();
+			}
+		} /*else if (!update.hasPreCheckoutQuery()) {
+			AnswerPreCheckoutQuery compraNoExitosa = new AnswerPreCheckoutQuery();
+			compraNoExitosa.setPreCheckoutQueryId(update.getPreCheckoutQuery().getId())
+				.setOk(false)
+				.setErrorMessage("No Patricio, la mayonesa no es un instrumento (la compra no se ha podido completar).");
+			try{
+				answerPreCheckoutQuery(compraNoExitosa);
+			} catch (TelegramApiException e) {
+					e.printStackTrace();
+			}
+		} */else if (update.hasCallbackQuery()) {
 			// Set variables
 			String call_data = update.getCallbackQuery().getData();
 			long message_id = update.getCallbackQuery().getMessage().getMessageId();

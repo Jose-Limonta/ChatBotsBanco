@@ -1,28 +1,60 @@
+buildscript {
+	ext {
+		springBootVersion = '2.0.0.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+		maven {
+	      url "https://plugins.gradle.org/m2/"
+	    }
+		maven { url "https://repo.spring.io/snapshot" }
+		maven { url "https://repo.spring.io/milestone" }
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath('org.springframework:springloaded:1.2.1.RELEASE')
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
 apply plugin: 'java-library'
 apply plugin: 'application'
 
-archivesBaseName = "bot-messenger"
-version = '1.0.0'
-mainClassName = "com.clivern.botmessenger.Main"
+group = 'com.bots'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+mainClassName = "com.bots.bots.BotsApplication"
+archivesBaseName  = "bots"
 
 repositories {
-    jcenter()
-    mavenCentral()
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    mavenLocal()
+	mavenCentral()
+	jcenter()
+	maven { url "https://repo.spring.io/snapshot" }
+	maven { url "https://repo.spring.io/milestone" }
 }
+
 
 dependencies {
-    compile 'com.sparkjava:spark-core:2.6.0'
-    compile 'org.slf4j:slf4j-api:1.7.13'
-    compile 'org.slf4j:slf4j-simple:1.7.13'
-    compile 'com.clivern:racter:1.0.2'
+	compile('org.springframework.boot:spring-boot-starter-data-jpa')
+	compile('org.springframework.boot:spring-boot-starter-data-rest')
+	compile('org.springframework.boot:spring-boot-starter-web')
+
+	compile('com.clivern:racter:1.0.4')
+	runtime('mysql:mysql-connector-java')
+	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
+
 task fatJar(type: Jar) {
-	manifest {
-        attributes 'Implementation-Title': 'Dunk ChatBot',
-        	'Implementation-Version': version,
-        	'Main-Class': mainClassName
+    manifest {
+        attributes 'Implementation-Title': 'Racter Spring Example',
+            'Implementation-Version': version,
+            'Main-Class': mainClassName
     }
     baseName = archivesBaseName + '_fat'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }

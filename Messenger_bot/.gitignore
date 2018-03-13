@@ -1,10 +1,25 @@
 .gradle
 /build/
-gradle-app.setting
-!gradle-wrapper.jar
-.gradletasknamecache
+!gradle/wrapper/gradle-wrapper.jar
+
+### STS ###
+.apt_generated
 .classpath
+.factorypath
 .project
 .settings
-.vscode
-bin
+.springBeans
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/

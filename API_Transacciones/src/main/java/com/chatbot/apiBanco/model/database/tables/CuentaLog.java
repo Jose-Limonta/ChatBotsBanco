@@ -1,6 +1,7 @@
 package com.chatbot.apiBanco.model.database.tables;
 
 import javax.persistence.*;
+import mx.openpay.client.BankAccount;
 
 @Entity
 public class CuentaLog {
@@ -14,9 +15,7 @@ public class CuentaLog {
     private String bank;
     private String holder;
 
-    @ManyToOne
-    @JoinColumn(name = "idCliente")
-    private ClienteLog cliente;
+    private long idCliente;
 
     public String getIdCuenta() {
         return idCuenta;
@@ -40,5 +39,19 @@ public class CuentaLog {
 
     public void setHolder(String holder) {
         this.holder = holder;
+    }
+
+    public void setCliente(Long cl){
+        this.idCliente = cl;
+    }
+
+    public CuentaLog(BankAccount ba){
+        this.bank = ba.getBankName();
+        this.holder = ba.getHolderName();
+        this.idCuenta = ba.getId();
+        //this.cliente = ba.ge
+    }
+
+    public CuentaLog() {
     }
 }

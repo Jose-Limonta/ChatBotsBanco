@@ -1,6 +1,9 @@
 package com.chatbot.apiBanco.controller;
 
 import com.chatbot.apiBanco.model.cliente.Range;
+import com.chatbot.apiBanco.model.database.repository.ClienteRepository;
+import com.chatbot.apiBanco.model.database.repository.TarjetaRepository;
+import com.chatbot.apiBanco.model.database.tables.TarjetaLog;
 import com.chatbot.apiBanco.model.tarjeta.Tarjeta;
 import mx.openpay.client.Card;
 import mx.openpay.client.core.OpenpayAPI;
@@ -9,6 +12,7 @@ import mx.openpay.client.exceptions.ServiceUnavailableException;
 import mx.openpay.client.utils.SearchParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.chatbot.apiBanco.model.error.Error;;
 
@@ -24,11 +28,19 @@ public class TarjetaController {
     private final Calendar dateGte = Calendar.getInstance();
     private final Calendar dateLte = Calendar.getInstance();
 
+    @Autowired
+    private TarjetaRepository tarjetaRepo;
+
+    @Autowired
+    private ClienteRepository clienteRepo;
+
     @RequestMapping(value = "/tarjeta",  method = RequestMethod.POST)
     @ResponseBody
     public Card creaTarjeta(@RequestBody Tarjeta input) throws OpenpayServiceException, ServiceUnavailableException {
 
         Card response = API.cards().create(input.getCustomerId(), input.toCard());
+        TarjetaLog tlog = new TarjetaLog(response);
+        tlog.setCliente(clienteRepo.findByToken(input.getCustomerId()).getId());
         return response;
     }
 
@@ -66,7 +78,6 @@ public class TarjetaController {
     @ExceptionHandler({ OpenpayServiceException.class })
     @ResponseBody
     public Error handleException(OpenpayServiceException ex) {
-        //
         Error e = new Error();
         e.setAdditionalProperty("Source", "Fallo de Operacion TarjetaLog");
         e.setErrorCode(ex.getErrorCode());
@@ -78,7 +89,6 @@ public class TarjetaController {
     @ExceptionHandler({ ServiceUnavailableException.class })
     @ResponseBody
     public Error handleServiceException(ServiceUnavailableException ex) {
-        //
         Error e = new Error();
         e.setAdditionalProperty("Source", "Servicio no disponible");
         e.setAdditionalProperty("Cause", ex.getCause());

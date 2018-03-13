@@ -30,13 +30,12 @@ public class ClienteController {
     private final Calendar dateLte = Calendar.getInstance();
 
     @Autowired
-	ClienteRepository crepo;
+	private ClienteRepository crepo;
 
 
     @RequestMapping(value = "/cliente",  method = RequestMethod.POST)
     @ResponseBody
     public ClienteOut altaCliente(@RequestBody  Cliente input) throws OpenpayServiceException, ServiceUnavailableException {
-        ;
         Customer response = API.customers().create(input.toCustomer());
         ClienteLog clog = new ClienteLog(input);
         clog.setToken(response.getId());
@@ -47,7 +46,10 @@ public class ClienteController {
     @RequestMapping(value = "/cliente",  method = RequestMethod.PATCH)
     @ResponseBody
     public ClienteOut actualizaCliente(@RequestBody  Cliente input) throws OpenpayServiceException, ServiceUnavailableException {
-        ClienteLog clog = crepo.findByEmail(input.getEmail()).get(0);
+        ClienteLog clog = crepo.findByToken(input.getId());
+        clog.setEmail(input.getEmail());
+        clog.setNombre(input.getName() + " " + input.getLastName());
+        clog.setIdBanco(input.getExternalId());
         crepo.save(clog);
 
         Customer response = input.toCustomer();
@@ -88,7 +90,6 @@ public class ClienteController {
     @ExceptionHandler({ OpenpayServiceException.class })
     @ResponseBody
     public Error handleException(OpenpayServiceException ex) {
-        //
         Error e = new Error();
         e.setAdditionalProperty("Source", "Fallo de Operacion Cliente");
         e.setErrorCode(ex.getErrorCode());
@@ -100,7 +101,6 @@ public class ClienteController {
     @ExceptionHandler({ ServiceUnavailableException.class })
     @ResponseBody
     public Error handleServiceException(ServiceUnavailableException ex) {
-        //
         Error e = new Error();
         e.setAdditionalProperty("Source", "Servicio no disponible");
         e.setAdditionalProperty("Cause", ex.getCause());

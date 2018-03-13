@@ -1,6 +1,9 @@
 package com.chatbot.apiBanco.controller;
 
 
+import com.chatbot.apiBanco.model.database.repository.ClienteRepository;
+import com.chatbot.apiBanco.model.database.repository.TransactionRepository;
+import com.chatbot.apiBanco.model.database.tables.TransactionLOGS;
 import com.chatbot.apiBanco.model.error.Error;
 import com.chatbot.apiBanco.model.transaccion.Transaccion;
 import mx.openpay.client.Transfer;
@@ -9,6 +12,7 @@ import mx.openpay.client.exceptions.OpenpayServiceException;
 import mx.openpay.client.exceptions.ServiceUnavailableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.chatbot.apiBanco.model.error.Error;;
 
@@ -24,12 +28,24 @@ public class TransaccionController {
     private final Calendar dateGte = Calendar.getInstance();
     private final Calendar dateLte = Calendar.getInstance();
 
+    @Autowired
+    private ClienteRepository clienteRepo;
+
+    @Autowired
+    private TransactionRepository transactRepo;
+
     @RequestMapping(value = "/transaccion",  method = RequestMethod.POST)
     @ResponseBody
     public Transfer  transferencia(@RequestBody Transaccion input) throws OpenpayServiceException, ServiceUnavailableException {
 
         Transfer transfer = API.transfers().create(input.getCustomerId(), input.toTransfer());
-       
+        TransactionLOGS tLogs = new TransactionLOGS();
+        tLogs.setAmount(transfer.getAmount());
+        tLogs.setDATED(transfer.getCreationDate());
+        tLogs.setToCliente(clienteRepo.findByToken(input.getToCustomer()).getId() ) ;
+        tLogs.setCliente(clienteRepo.findByToken(input.getCustomerId()).getId() );
+
+        transactRepo.save(tLogs);
         return transfer;
     }
 

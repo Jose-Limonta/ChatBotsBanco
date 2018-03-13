@@ -14,7 +14,7 @@ public class ClienteLog {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long idcliente;
 
-    private String Token;
+    private String token;
     private String idBanco;
     private String nombre;
     private String email;
@@ -29,11 +29,11 @@ public class ClienteLog {
 
 
     public String getToken() {
-        return Token;
+        return token;
     }
 
     public void setToken(String token) {
-        Token = token;
+        token = token;
     }
 
     public String getIdBanco() {
@@ -63,7 +63,14 @@ public class ClienteLog {
     public ClienteLog (Cliente cli){
         this.email = cli.getEmail();
         this.nombre = cli.getName() + " " + cli.getLastName();
-        this.Token = cli.getId();
+        this.token = cli.getId();
         this.idBanco = cli.getExternalId();
+    }
+
+    public ClienteLog() {
+    }
+
+    public Long getId(){
+        return this.idcliente;
     }
 }

@@ -14,14 +14,9 @@ public class TransactionLOGS {
     private long Transaction_id;
 
 
+    private Long From_User_ID;
 
-    @ManyToOne
-    @JoinColumn(name = "From_User_ID")
-    private ClienteLog from_cliente;
-
-    @ManyToOne
-    @JoinColumn(name = "To_User_ID")
-    private ClienteLog to_cliente;
+    private Long To_User_ID;
 
 
     private Date DATED;
@@ -68,5 +63,16 @@ public class TransactionLOGS {
 
     public void setMESSAGE(String MESSAGE) {
         this.MESSAGE = MESSAGE;
+    }
+
+    public void setCliente(Long cl){
+        this.From_User_ID = cl;
+    }
+
+    public void setToCliente(Long cl){
+        this.To_User_ID = cl;
+    }
+
+    public TransactionLOGS() {
     }
 }

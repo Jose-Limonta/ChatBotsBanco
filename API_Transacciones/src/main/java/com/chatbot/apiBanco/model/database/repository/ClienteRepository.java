@@ -11,4 +11,5 @@ import java.util.List;
 public interface ClienteRepository extends PagingAndSortingRepository<ClienteLog, Long>{
     List<ClienteLog> findByEmail(String email);
     List<ClienteLog> findByNombre(String nombre);
+    ClienteLog findByToken(String token);
 }

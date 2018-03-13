@@ -3,6 +3,10 @@ package com.chatbot.apiBanco.controller;
 
 import com.chatbot.apiBanco.model.cliente.Range;
 import com.chatbot.apiBanco.model.cuenta.Cuenta;
+import com.chatbot.apiBanco.model.database.repository.ClienteRepository;
+import com.chatbot.apiBanco.model.database.repository.CuentaRepository;
+import com.chatbot.apiBanco.model.database.tables.CuentaLog;
+
 import mx.openpay.client.BankAccount;
 import mx.openpay.client.core.OpenpayAPI;
 import mx.openpay.client.exceptions.OpenpayServiceException;
@@ -10,6 +14,7 @@ import mx.openpay.client.exceptions.ServiceUnavailableException;
 import mx.openpay.client.utils.SearchParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.chatbot.apiBanco.model.error.Error;;
 
@@ -24,11 +29,20 @@ public class CuentaController {
     private static final OpenpayAPI API = new OpenpayAPI("https://sandbox-api.openpay.mx", "sk_e4ab3db394a247c8a0eee7099e62ff5b", "moiatycvyhadtev60q8x");
     private final Calendar dateGte = Calendar.getInstance();
     private final Calendar dateLte = Calendar.getInstance();
+ 
+    @Autowired
+    private CuentaRepository cuentaRepo;
+
+    @Autowired
+    private ClienteRepository clienteRepo;
 
     @RequestMapping(value = "/cuenta",  method = RequestMethod.POST)
     @ResponseBody
-    public BankAccount altaCuenta(@RequestBody  Cuenta input) throws OpenpayServiceException, ServiceUnavailableException {
+    public BankAccount altaCuenta(@RequestBody  Cuenta input) throws OpenpayServiceException, ServiceUnavailableException {     
         BankAccount response = API.bankAccounts().create( input.getCustomerId() ,input.toAccount());
+        CuentaLog c_log = new CuentaLog(response);
+        c_log.setCliente( clienteRepo.findByToken(input.getCustomerId()).getId() );
+        cuentaRepo.save(c_log);
         return response;
     }
 

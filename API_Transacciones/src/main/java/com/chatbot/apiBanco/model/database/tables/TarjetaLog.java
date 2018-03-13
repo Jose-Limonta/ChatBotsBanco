@@ -1,6 +1,7 @@
 package com.chatbot.apiBanco.model.database.tables;
 
 import javax.persistence.*;
+import mx.openpay.client.Card;
 import java.util.Date;
 
 @Entity
@@ -15,14 +16,22 @@ public class TarjetaLog {
 
     private String id;
 
+    private Long idCliente;
 
-    public void setId(String id) {
+
+    public TarjetaLog(Card response) {
+        this.creationDate = response.getCreationDate();
+        this.id = response.getId();
+    }
+    
+    public void setCliente(Long cl){
+        this.idCliente = cl;
+    }
+
+	public void setId(String id) {
         this.id = id;
     }
 
-    @ManyToOne
-    @JoinColumn(name = "idCliente")
-    private ClienteLog cliente;
 
     public String getId() {
         return id;
@@ -36,4 +45,6 @@ public class TarjetaLog {
         this.creationDate = creationDate;
     }
 
+    public TarjetaLog() {
+    }
 }

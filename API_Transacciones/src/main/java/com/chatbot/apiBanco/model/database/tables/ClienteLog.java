@@ -33,7 +33,7 @@ public class ClienteLog {
     }
 
     public void setToken(String token) {
-        token = token;
+        this.token = token;
     }
 
     public String getIdBanco() {

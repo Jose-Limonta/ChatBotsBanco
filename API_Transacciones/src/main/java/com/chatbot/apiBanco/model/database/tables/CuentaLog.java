@@ -49,7 +49,7 @@ public class CuentaLog {
         this.bank = ba.getBankName();
         this.holder = ba.getHolderName();
         this.idCuenta = ba.getId();
-        //this.cliente = ba.ge
+        //this.client = ba.ge
     }
 
     public CuentaLog() {

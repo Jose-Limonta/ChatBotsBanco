@@ -81,6 +81,12 @@ public class ChargeController {
 
     }
 
+    @RequestMapping(value = "/charge/{cudtomerId}/{transactionId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Charge findCharge(@PathVariable String customerId, @PathVariable String transactionId) throws OpenpayServiceException, ServiceUnavailableException{
+        return API.charges().get(customerId, transactionId);
+    }
+
     @ExceptionHandler({ OpenpayServiceException.class })
     @ResponseBody
     public Error handleException(OpenpayServiceException ex) {

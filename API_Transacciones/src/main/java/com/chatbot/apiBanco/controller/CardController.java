@@ -33,7 +33,7 @@ public class CardController {
     @Autowired
     private ClienteRepository clienteRepo;
 
-    @RequestMapping(value = "/card",  method = RequestMethod.POST)
+    @RequestMapping(value = "/v1/card",  method = RequestMethod.POST)
     @ResponseBody
     public Card creaTarjeta(@RequestBody Cardjs input) throws OpenpayServiceException, ServiceUnavailableException {
 
@@ -44,7 +44,7 @@ public class CardController {
     }
 
 
-    @RequestMapping(value = "/card/{customerId}/{id}",  method = RequestMethod.GET)
+    @RequestMapping(value = "/v1/card/{customerId}/{id}",  method = RequestMethod.GET)
     @ResponseBody
     public Card getTarjeta(@PathVariable  String id, @PathVariable String customerId) throws OpenpayServiceException, ServiceUnavailableException {
 
@@ -52,7 +52,7 @@ public class CardController {
         return card;
     }
 
-    @RequestMapping(value = "/card/{customerId}/{id}",  method = RequestMethod.DELETE)
+    @RequestMapping(value = "/v1/card/{customerId}/{id}",  method = RequestMethod.DELETE)
     @ResponseBody
     public boolean deleteTarjeta(@PathVariable  String id, @PathVariable String customerId) throws OpenpayServiceException, ServiceUnavailableException {
 
@@ -60,7 +60,7 @@ public class CardController {
         return true ;
     }
 
-    @RequestMapping(value = "/cards",  method = RequestMethod.POST)
+    @RequestMapping(value = "/v1/cards",  method = RequestMethod.POST)
     @ResponseBody
     public List<Card>  getTarjetas(@RequestBody Range dates) throws OpenpayServiceException, ServiceUnavailableException {
         dateGte.set(dates.getInicio().getAnio(), dates.getInicio().getMes(), dates.getInicio().getDia(), dates.getInicio().getHora(), dates.getInicio().getMinuto(), dates.getInicio().getSegundo());

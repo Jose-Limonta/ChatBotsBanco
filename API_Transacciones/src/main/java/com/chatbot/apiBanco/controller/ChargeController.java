@@ -31,7 +31,7 @@ public class ChargeController {
     @Autowired
     TransactionRepository transactionRepository;
 
-    @RequestMapping(value = "/charge",  method = RequestMethod.POST)
+    @RequestMapping(value = "/v1/charge",  method = RequestMethod.POST)
     @ResponseBody
     public Charge addCharge(@RequestBody Chargejs input) throws OpenpayServiceException, ServiceUnavailableException {
 
@@ -57,7 +57,7 @@ public class ChargeController {
     }
 
 
-    @RequestMapping(value = "/confirm",  method = RequestMethod.POST)
+    @RequestMapping(value = "/v1/confirm",  method = RequestMethod.POST)
     @ResponseBody
     public Charge confirmCharge(@RequestBody Confirmjs input) throws OpenpayServiceException, ServiceUnavailableException {
 
@@ -69,7 +69,7 @@ public class ChargeController {
 
     }
 
-    @RequestMapping(value = "/refund",  method = RequestMethod.POST)
+    @RequestMapping(value = "/v1/refund",  method = RequestMethod.POST)
     @ResponseBody
     public Charge refundCharge(@RequestBody Confirmjs input) throws OpenpayServiceException, ServiceUnavailableException {
 
@@ -81,7 +81,7 @@ public class ChargeController {
 
     }
 
-    @RequestMapping(value = "/charge/{cudtomerId}/{transactionId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/v1/charge/{cudtomerId}/{transactionId}", method = RequestMethod.GET)
     @ResponseBody
     public Charge findCharge(@PathVariable String customerId, @PathVariable String transactionId) throws OpenpayServiceException, ServiceUnavailableException{
         return API.charges().get(customerId, transactionId);

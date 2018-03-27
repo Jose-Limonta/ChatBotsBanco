@@ -36,7 +36,7 @@ public class AccountController {
     @Autowired
     private ClienteRepository clienteRepo;
 
-    @RequestMapping(value = "/account",  method = RequestMethod.POST)
+    @RequestMapping(value = "/v1/account",  method = RequestMethod.POST)
     @ResponseBody
     public BankAccount altaCuenta(@RequestBody Accounts input) throws OpenpayServiceException, ServiceUnavailableException {
         BankAccount response = API.bankAccounts().create( input.getCustomerId() ,input.toAccount());
@@ -46,21 +46,21 @@ public class AccountController {
         return response;
     }
 
-    @RequestMapping(value = "/account/{customerId}/{accountId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/v1/account/{customerId}/{accountId}", method = RequestMethod.GET)
     @ResponseBody
     public BankAccount getCuenta(@PathVariable  String customerId,@PathVariable  String accountId ) throws ServiceUnavailableException, OpenpayServiceException{
         BankAccount bankAccount = API.bankAccounts().get(customerId, accountId);
         return bankAccount;
     }
 
-    @RequestMapping(value = "/account/{customerId}/{accountId}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/v1/account/{customerId}/{accountId}", method = RequestMethod.DELETE)
     @ResponseBody
     public boolean deleteCuenta(@PathVariable  String customerId,@PathVariable  String accountId ) throws ServiceUnavailableException, OpenpayServiceException{
         API.bankAccounts().delete(customerId, accountId);
         return true;
     }
 
-    @RequestMapping(value = "/accounts",  method = RequestMethod.POST)
+    @RequestMapping(value = "/v1/accounts",  method = RequestMethod.POST)
     @ResponseBody
     public List<BankAccount> getCuentas(@RequestBody Range dates) throws OpenpayServiceException, ServiceUnavailableException {
         dateGte.set(dates.getInicio().getAnio(), dates.getInicio().getMes(), dates.getInicio().getDia(), dates.getInicio().getHora(), dates.getInicio().getMinuto(), dates.getInicio().getSegundo());

@@ -34,7 +34,7 @@ public class TransactionController {
     @Autowired
     private TransactionRepository transactRepo;
 
-    @RequestMapping(value = "/transaction",  method = RequestMethod.POST)
+    @RequestMapping(value = "/v1/transaction",  method = RequestMethod.POST)
     @ResponseBody
     public Transfer  transferencia(@RequestBody Transactionjs input) throws OpenpayServiceException, ServiceUnavailableException {
 
@@ -50,7 +50,7 @@ public class TransactionController {
     }
 
    
-    @RequestMapping(value = "/transaction/{customerId}/{transactionId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/v1/transaction/{customerId}/{transactionId}", method = RequestMethod.GET)
     @ResponseBody
     public Transfer getTransfer(@PathVariable String customerId, @PathVariable String transactionId) throws OpenpayServiceException, ServiceUnavailableException{
         Transfer transfer = API.transfers().get(customerId, transactionId);

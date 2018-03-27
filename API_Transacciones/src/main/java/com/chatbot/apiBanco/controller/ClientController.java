@@ -33,7 +33,7 @@ public class ClientController {
 	private ClienteRepository crepo;
 
 
-    @RequestMapping(value = "/client",  method = RequestMethod.POST)
+    @RequestMapping(value = "/v1/client",  method = RequestMethod.POST)
     @ResponseBody
     public ClientOut altaCliente(@RequestBody Client input) throws OpenpayServiceException, ServiceUnavailableException {
         Customer response = API.customers().create(input.toCustomer());
@@ -43,7 +43,7 @@ public class ClientController {
         return new ClientOut(response);
     }
 
-    @RequestMapping(value = "/client",  method = RequestMethod.PATCH)
+    @RequestMapping(value = "/v1/client",  method = RequestMethod.PATCH)
     @ResponseBody
     public ClientOut actualizaCliente(@RequestBody Client input) throws OpenpayServiceException, ServiceUnavailableException {
         ClienteLog clog = crepo.findByToken(input.getId());
@@ -58,13 +58,13 @@ public class ClientController {
         return new ClientOut(response);
     }
 
-    @RequestMapping(value = "/client/{id}",  method = RequestMethod.GET)
+    @RequestMapping(value = "/v1/client/{id}",  method = RequestMethod.GET)
     @ResponseBody
     public Customer getCliente(@PathVariable  String id) throws OpenpayServiceException, ServiceUnavailableException {
         return  API.customers().get(id);
     }
 
-    @RequestMapping(value = "/client/{id}",  method = RequestMethod.DELETE)
+    @RequestMapping(value = "/v1/client/{id}",  method = RequestMethod.DELETE)
     @ResponseBody
     public ClientOut deleteCliente(@PathVariable  String id) throws OpenpayServiceException, ServiceUnavailableException {
         ClienteLog clog = crepo.findByEmail(API.customers().get(id).getEmail()).get(0);
@@ -73,7 +73,7 @@ public class ClientController {
         return new ClientOut();
     }
 
-    @RequestMapping(value = "/clients",  method = RequestMethod.POST)
+    @RequestMapping(value = "/v1/clients",  method = RequestMethod.POST)
     @ResponseBody
     public List<Customer> getClientes(@RequestBody Range dates) throws OpenpayServiceException, ServiceUnavailableException {
         dateGte.set(dates.getInicio().getAnio(), dates.getInicio().getMes(), dates.getInicio().getDia(), dates.getInicio().getHora(), dates.getInicio().getMinuto(), dates.getInicio().getSegundo());

@@ -35,19 +35,20 @@ public class AccionesAPI {
 	public void getDatosCliente(String cliente) throws UnirestException {
 	}
 	
-	public Map<Object,Object> setTarjeta(Tarjetas tarjeta) throws UnirestException{
+	public Map<Object,Object> setTarjeta(Tarjetas tarjeta) throws UnirestException,NullPointerException{
 		LOGGER.info("Método en ejecución: setNuevaTarjeta(Tarjetas)");
-		if(!tarjeta.getNtarjeta().isEmpty() && tarjeta != null) {
-			HttpResponse<String> response = Unirest.post("http://localhost:8087/tarjetases")
-				  .header("Content-Type", "application/json")
-				  .header("Cache-Control", "no-cache").body(tarjeta)
-				  //.body("{\n\t\"fecha\" : \"2018-03-11\",\n    \"nbanco\" : \"Banamex\",\n    \"ttarjeta\" : \"Master Card\",\n    \"ntarjeta\" : \"324788545493845\",\n    \"iduser\":\"http://localhost:8087/usuarioses/1809264795810706\"\n}")
-				  .asString();
-			
-			LOGGER.info("Datos de salida: "+response.getBody());
-			if(!response.getBody().isEmpty()) {
-				Response class_response = new Response( response.getBody() );		
-				return class_response.getMapResponse();
+		if(tarjeta != null) {
+			if(!tarjeta.getNtarjeta().isEmpty()) {
+				HttpResponse<String> response = Unirest.post("http://localhost:8087/tarjetases")
+					  .header("Content-Type", "application/json")
+					  .header("Cache-Control", "no-cache").body(tarjeta)
+					  .asString();
+				
+				LOGGER.info("Datos de salida: "+response.getBody());
+				if(!response.getBody().isEmpty()) {
+					Response class_response = new Response( response.getBody() );		
+					return class_response.getMapResponse();
+				}
 			}
 		}
 		
@@ -63,7 +64,7 @@ public class AccionesAPI {
 		
 		if(!user.getIduser().isEmpty()) {
 			HttpResponse<String> response = Unirest.post(
-					SERVER + PORT + "/" + Constantes.USUARIOS.getString() )
+					SERVER + PORT + "/usuarioses" )
 					  .header("Content-Type", "application/json")
 					  .header("Cache-Control", "no-cache")
 					  .body( getJSONObjectOfClass(user) )
@@ -86,7 +87,7 @@ public class AccionesAPI {
 		LOGGER.info("Método en ejecución: getClienteByClave(String)");
 		
 		if(!clave_iduser.isEmpty()) {
-			HttpResponse<String> response = Unirest.get(SERVER + PORT + "/" + Constantes.USUARIOS.getString() + "/"+clave_iduser)
+			HttpResponse<String> response = Unirest.get(SERVER + PORT + "/usuarioses/"+clave_iduser)
 					  .header("Cache-Control", "no-cache")
 					  .asString();
 			if(!response.getBody().isEmpty()) {
@@ -113,7 +114,11 @@ public class AccionesAPI {
 	
 	
 	
-	public Usuarios convertMapToUsuarios(Map<Object,Object> mapa, String id_user) throws ParseException, JSONException, UnirestException {
+	public Usuarios convertMapToUsuarios(Map<Object,Object> mapa, String id_user) 
+			throws ParseException, JSONException, UnirestException {
+		if(mapa.isEmpty()) 
+			return new Usuarios();
+		
 		Usuarios user = new Usuarios();
         user.setFecha(convertStringToDate(mapa.get("fecha").toString()));
         user.setIdpagina(mapa.get("idpagina").toString());
@@ -188,7 +193,8 @@ public class AccionesAPI {
         return tarjeta;
     }
 
-    private Transacciones getTransaccionesByMap(Map<Object, Object> mapadetransacciones) throws ParseException, UnirestException {
+    private Transacciones getTransaccionesByMap(Map<Object, Object> mapadetransacciones) 
+    		throws ParseException, UnirestException {
         Transacciones transaccion = new Transacciones();
 
         transaccion.setClavetransaccion(mapadetransacciones.get("clavetransaccion").toString());
@@ -200,8 +206,11 @@ public class AccionesAPI {
         String id = urlclave.split("/")[tamaniosplit - 1];
         transaccion.setIdtransaccion(Integer.parseInt(id));
 
-        Map<Object, Object> listtarjeta = getMapFromHttpResponse(urltransacciones.getJSONObject("ndtarjeta").get("href").toString());
-        Map<Object, Object> listusuario = getMapFromHttpResponse(urltransacciones.getJSONObject("iduser").get("href").toString());
+        Map<Object, Object> listtarjeta = getMapFromHttpResponse(urltransacciones
+        		.getJSONObject("ndtarjeta").get("href").toString());
+        Map<Object, Object> listusuario = getMapFromHttpResponse(urltransacciones
+        		.getJSONObject("iduser").get("href").toString());
+        
         transaccion.setNdtarjeta(getTarjetaByMap(listtarjeta));
         transaccion.setIduser(getUsuariosByMap(listusuario));
 

@@ -2,7 +2,7 @@ package com.chatbot.apiBanco.model.database.tables;
 
 import javax.persistence.*;
 
-import com.chatbot.apiBanco.model.cliente.Cliente;
+import com.chatbot.apiBanco.model.client.Client;
 
 import java.util.List;
 
@@ -33,7 +33,7 @@ public class ClienteLog {
     }
 
     public void setToken(String token) {
-        token = token;
+        this.token = token;
     }
 
     public String getIdBanco() {
@@ -60,7 +60,7 @@ public class ClienteLog {
         this.email = email;
     }
 
-    public ClienteLog (Cliente cli){
+    public ClienteLog (Client cli){
         this.email = cli.getEmail();
         this.nombre = cli.getName() + " " + cli.getLastName();
         this.token = cli.getId();

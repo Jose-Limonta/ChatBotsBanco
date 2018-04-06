@@ -10,9 +10,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 
+import com.bots.bots.model.Sesiones;
 import com.bots.bots.model.Tarjetas;
 import com.bots.bots.model.Usuarios;
 import com.clivern.racter.receivers.webhook.MessageReceivedWebhook;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
 public class AccionesMensajes {
@@ -145,6 +147,31 @@ public class AccionesMensajes {
         Date parsed = format.parse( format.format( new Date() ) );
         java.sql.Date sql = new java.sql.Date(parsed.getTime());
         return sql;
+    }
+    
+    protected int getSesionesExistentes(String clave) throws UnirestException{
+    	AccionesAPI accion = new AccionesAPI();
+    	return accion.getSesiones( clave ).size();
+    }
+    
+    protected boolean setAddSesion(Sesiones sesion) throws UnirestException, JsonProcessingException {
+    	AccionesAPI accion = new AccionesAPI();
+    	Map<Object, Object> sesion_retorno = accion.setAddSesion(sesion);
+    	if(sesion_retorno.containsKey("message")) 
+    		return false;
+    	else
+    		return true;
+    	
+    }
+    
+    protected boolean setEditSesion(Sesiones sesion) throws UnirestException, JsonProcessingException {
+    	AccionesAPI accion = new AccionesAPI();
+    	Map<Object, Object> sesion_retorno = accion.setEditSesion(sesion);
+    	if(sesion_retorno.containsKey("message")) 
+    		return false;
+    	else
+    		return true;
+    	
     }
 }
 

@@ -16,11 +16,11 @@ import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "transacciones", catalog = "bots", schema = "")
-public class Transacciones implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class Transacciones implements Serializable{
     
-    @Id
+	private static final long serialVersionUID = 1L;
+	
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "idtransaccion")

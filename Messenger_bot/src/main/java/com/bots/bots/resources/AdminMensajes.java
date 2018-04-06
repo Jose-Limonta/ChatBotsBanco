@@ -1,29 +1,27 @@
 package com.bots.bots.resources;
 
 import java.text.ParseException;
-import java.util.Enumeration;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
+import com.bots.bots.model.Sesiones;
 import com.bots.bots.model.Usuarios;
+import com.bots.bots.service.SesionesService;
 import com.clivern.racter.BotPlatform;
 import com.clivern.racter.receivers.webhook.MessageReceivedWebhook;
 import com.clivern.racter.senders.templates.ButtonTemplate;
 import com.clivern.racter.senders.templates.MessageTemplate;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
 public class AdminMensajes extends AccionesMensajes{
 	
-	private HttpSession httpsession;
-	
 	private static final Log LOGGER = LogFactory.getLog(AdminMensajes.class);
-	
-	private boolean accion_by_non_register_user = false;
 	
 	private String tarjeta = "";	
 	private boolean verificador_insersion = false;
@@ -36,38 +34,54 @@ public class AdminMensajes extends AccionesMensajes{
 	private MessageReceivedWebhook message;
 	private BotPlatform platform;
 	
-	public AdminMensajes(String reply, MessageReceivedWebhook message, BotPlatform platform, HttpServletRequest request) {
+	@Autowired
+	@Qualifier("servicioSesiones")
+	private SesionesService servicioSesiones;
+	
+	private Sesiones sesion;
+	
+	
+	public void setConfiguration(String reply, MessageReceivedWebhook message, BotPlatform platform) throws UnirestException, JsonProcessingException {
 		this.reply = reply;
 		this.message = message;
 		this.platform = platform;
-		if(!request.getSession().getAttributeNames().hasMoreElements())
-			this.httpsession = request.getSession();
+		sesion = new Sesiones();
+		if( getSesionesExistentes(message.getUserId()) > 0 ) 
+			sesion = servicioSesiones.getSesionById(message.getUserId()).get();
+		else {
+			sesion.setIdSesion(message.getUserId());
+			sesion.setRegistro( ( short ) 0);
+			sesion.setFecha(new Date());
+			setAddSesion(sesion);
+		}
 	}
 	
-	public void messagesExecute(String text, MessageTemplate message_tpl, 
-			ButtonTemplate button_message_tpl) throws UnirestException, ParseException {
-		Enumeration<String> sesion = httpsession.getAttributeNames();
-		while(sesion.hasMoreElements()) {
-			LOGGER.info("Elementos next: " + sesion.nextElement() );
-		}
+	private void setInitializrCredentials(String text) throws JsonProcessingException, UnirestException {
 		
-		if(httpsession.getAttribute("accion_transferencia_consulta") == null) 
-			httpsession.setAttribute("accion_transferencia_consulta","");
-		
-		if(httpsession.getAttribute("accion_by_non_register_user") == null) 
-			httpsession.setAttribute("accion_by_non_register_user", accion_by_non_register_user);
-		
-		if(text.split(" ").length == 2) {			
-			if(text.split(" ")[1].length() == 3)
-				accion_by_non_register_user = true;
+		if(text.split(" ").length == 2) {
+			short accion_by_non_register_user = 0;
 			
-			httpsession.setAttribute("accion_by_non_register_user", accion_by_non_register_user);
+			if(text.split(" ")[1].length() == 3)
+				accion_by_non_register_user = 1;
+			
+			sesion.setRegistro(accion_by_non_register_user);
+			setEditSesion(sesion);
+			
 		}else if(text.split(" ").length == 3) {
 			if( getValidaDatosTransferencia( text ) ) {
 				datostransfer = text.split(" ");
 				realizatransfer = true;
 			}
 		}
+		
+		LOGGER.info("Método: setInitializrCredentials(Stirng) => Variable de sesión: " + sesion.getRegistro() );
+	}
+	
+	public void messagesExecute(String text, MessageTemplate message_tpl, 
+			ButtonTemplate button_message_tpl, String action) 
+					throws UnirestException, ParseException, JsonProcessingException {
+		
+		setInitializrCredentials(text);
          
 		String cuenta ="0";
         if( text.length() >= 19) 
@@ -101,16 +115,9 @@ public class AdminMensajes extends AccionesMensajes{
             message_tpl.setQuickReply("text", "Eliminar tarjeta", "delete_tarjeta_click", "");
             platform.getBaseSender().send(message_tpl);
 
-        }/*else if( text.toLowerCase().contains("salir") || text.toLowerCase().contains("exit") ){
-        	if(httpsession != null)
-        		httpsession.invalidate();
-        	
-        	message_tpl.setRecipientId(message.getUserId());
-            message_tpl.setMessageText("Tu sesión se invalidó correctamente, hasta la próxima :)");
-            platform.getBaseSender().send(message_tpl);
-        }*/
+        }
         
-        if((boolean) httpsession.getAttribute("accion_by_non_register_user")) 
+        if(sesion.getRegistro() == 1) 
         	setActionForNonRegisterUsers( message_tpl );        
         
         if( realizatransfer )
@@ -119,25 +126,23 @@ public class AdminMensajes extends AccionesMensajes{
         if( verificador_insersion )
 			guardaDatos( message_tpl );
 
-        getChoiceActions( message_tpl );
+        getChoiceActions( message_tpl, action );
 	}
 	
-    private void getChoiceActions(MessageTemplate message_tpl) throws UnirestException, ParseException {
-    	
-    	if( reply.equals("consulta_saldo_click") ){    		
+    private void getChoiceActions(MessageTemplate message_tpl, String action) throws UnirestException, ParseException, JsonProcessingException {
+    	if(!action.isEmpty()) {
     		seleccionaTarjeta( message_tpl );
-    		httpsession.setAttribute("accion_transferencia_consulta", "consulta");
-
-        }else if( reply.equals("transferencia_click") ){
-        	seleccionaTarjeta( message_tpl );
-        	httpsession.setAttribute("accion_transferencia_consulta", "transferencia");
-        }
+			sesion.setAccion(action);
+			setEditSesion(sesion);
+    	}
+    	
+    	LOGGER.info("\n\nAcciones disponibles: " + sesion.getAccion() + "\n\n");
     	
     	getBankActions( message_tpl );
     }
     
     
-    private void getBankActions(MessageTemplate message_tpl) throws UnirestException, ParseException {    	
+    private void getBankActions(MessageTemplate message_tpl) throws UnirestException, ParseException, JsonProcessingException {    	
     	Usuarios user = getUsuarioFromRegister( message.getUserId() );
 		
 		if(user != null && user.getTarjetasList() != null) {
@@ -145,13 +150,14 @@ public class AdminMensajes extends AccionesMensajes{
 	    	for(int i = 0 ; i < numero_de_tarjetas; i++) {	    		
 	    		String itemString = "select_banco_banamex_click_"+i;	    		
 	    		if(itemString.equals(reply)) {
-	    			LOGGER.info("select_banco_banamex_click_" + i + " == " + reply );
 	    			tarjeta = user.getTarjetasList().get(i).getNtarjeta();
 	    			
-	    			if(httpsession.getAttribute("accion_transferencia_consulta") == "consulta") {
-	    				httpsession.setAttribute("accion_transferencia_consulta", "");
-	    			}else if(httpsession.getAttribute("accion_transferencia_consulta") == "transferencia") {
-	    				httpsession.setAttribute("accion_transferencia_consulta", "");
+	    			if(sesion.getAccion() == "consulta") {
+	    				sesion.setAccion("");
+	    				setEditSesion(sesion);
+	    			}else if(sesion.getAccion() == "transferencia") {
+	    				sesion.setAccion("");
+	    				setEditSesion(sesion);
 	    			}
 	    			
 	    		}
@@ -161,14 +167,16 @@ public class AdminMensajes extends AccionesMensajes{
 			if( reply.equals("select_banco_banamex_click") ){
 	    		message_tpl.setRecipientId(message.getUserId());
 	            message_tpl.setMessageText("Dame tu número de cuenta Banamex y tu clave de acceso separado por espacio");
-	            accion_by_non_register_user = true;
+	            sesion.setRegistro( (short ) 1);
+	            setEditSesion(sesion);
 	            
 	            platform.getBaseSender().send(message_tpl);	            
 
 	        }else if( reply.equals("select_banco_bancomer_click") ){
 	    		message_tpl.setRecipientId(message.getUserId());
 	            message_tpl.setMessageText("Dame tu número de cuenta Bancomer");
-	            accion_by_non_register_user = true;
+	            sesion.setRegistro( (short ) 1);
+	            setEditSesion(sesion);
 	            
 	            platform.getBaseSender().send(message_tpl);
 
@@ -187,18 +195,21 @@ public class AdminMensajes extends AccionesMensajes{
         verificador_insersion = true;
     }
     
-    private void setActionForNonRegisterUsers(MessageTemplate message_tpl) throws UnirestException {
-		if(httpsession.getAttribute("accion_transferencia_consulta") == "consulta") {
+    private void setActionForNonRegisterUsers(MessageTemplate message_tpl) throws UnirestException, JsonProcessingException {
+    	LOGGER.info("setActionForNonRegisterUsers(MessageTemplate) " 
+    			+ "if("+sesion.getAccion()+" == 'consulta') " );
+		if(sesion.getAccion() == "consulta") {
     		Double saldo = setRealizarConsulta();
     		
     		message_tpl.setRecipientId(message.getUserId());
             message_tpl.setMessageText("Tu saldo es de: " + saldo);
             platform.getBaseSender().send(message_tpl);
-            
+			
             saveTarjeta( message_tpl );
             
-            httpsession.setAttribute("accion_transferencia_consulta","");
-		}else if(httpsession.getAttribute("accion_transferencia_consulta") == "transferencia") {
+            //sesion.setAccion( "" );
+            //setEditSesion(sesion);            
+		}else if(sesion.getAccion() == "transferencia") {
 			if( setRealizaTransaccion( datostransfer ) ) {
 				message_tpl.setRecipientId(message.getUserId());
 	            message_tpl.setMessageText("La transferencia se realizó correctamente");
@@ -206,7 +217,8 @@ public class AdminMensajes extends AccionesMensajes{
 	            
 	            saveTarjeta( message_tpl );
 			}
-			httpsession.setAttribute("accion_transferencia_consulta","");
+			//sesion.setAccion( "" );
+			//setEditSesion(sesion);
 		}
 	}
 

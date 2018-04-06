@@ -16,11 +16,11 @@ import javax.xml.bind.annotation.XmlTransient;
 
 @Entity
 @Table(name = "usuarios", catalog = "bots", schema = "")
-public class Usuarios implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class Usuarios implements Serializable{
     
-    @Basic(optional = false)
+	private static final long serialVersionUID = 1L;
+	
+	@Basic(optional = false)
     @Column(name = "fecha")
     @Temporal(TemporalType.DATE)
     private Date fecha;

@@ -14,9 +14,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.bots.bots.model.Sesiones;
 import com.bots.bots.model.Tarjetas;
 import com.bots.bots.model.Transacciones;
 import com.bots.bots.model.Usuarios;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
@@ -33,6 +36,43 @@ public class AccionesAPI {
 	}
 	
 	public void getDatosCliente(String cliente) throws UnirestException {
+	}
+	
+	public Map<Object, Object> getSesiones(String clave) throws UnirestException {
+		return getMapFromHttpResponse("http://localhost:8087/tarjetases/" + clave );
+	}
+	
+	public Map<Object, Object> setAddSesion(Sesiones sesion) throws UnirestException, JsonProcessingException {
+		Unirest.clearDefaultHeaders();
+	    ObjectMapper mapper = new ObjectMapper();
+		HttpResponse<String> response = Unirest.post("http://localhost:8087/sesioneses")
+				  .header("Content-Type", "application/json")
+				  .header("Postman-Token", "070cff39-9c96-9848-2567-6db761ed07ed")
+				  .header("Cache-Control", "no-cache").body(mapper.writeValueAsString(sesion))
+				  .asString();
+
+      if (!response.getBody().isEmpty()) {
+          Response class_response = new Response(response.getBody());
+          return class_response.getMapResponse();
+      }
+      
+      return new HashMap<Object, Object>();
+	}
+	
+	public Map<Object, Object> setEditSesion(Sesiones sesion) throws UnirestException, JsonProcessingException {
+		Unirest.clearDefaultHeaders();
+	    ObjectMapper mapper = new ObjectMapper();
+		HttpResponse<String> response = Unirest.put("http://localhost:8087/sesioneses/" + sesion.getIdSesion())
+				  .header("Content-Type", "application/json")
+				  .header("Cache-Control", "no-cache").body(mapper.writeValueAsString(sesion))
+				  .asString();
+		if (response.getBody() == null) return new HashMap<Object, Object>();
+        if (!response.getBody().isEmpty()) {
+            Response class_response = new Response(response.getBody());
+            return class_response.getMapResponse();
+        }
+        
+        return new HashMap<Object, Object>();
 	}
 	
 	public Map<Object,Object> setTarjeta(Tarjetas tarjeta) throws UnirestException,NullPointerException{

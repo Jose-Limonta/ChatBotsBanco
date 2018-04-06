@@ -18,11 +18,11 @@ import javax.xml.bind.annotation.XmlTransient;
 
 @Entity
 @Table(name = "tarjetas", catalog = "bots", schema = "")
-public class Tarjetas implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class Tarjetas implements Serializable{
     
-    @Basic(optional = false)
+	private static final long serialVersionUID = 1L;
+	
+	@Basic(optional = false)
     @Column(name = "fecha")
     @Temporal(TemporalType.DATE)
     private Date fecha;

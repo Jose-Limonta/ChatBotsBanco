@@ -43,10 +43,16 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-data-jpa')
 	compile('org.springframework.boot:spring-boot-starter-data-rest')
 	compile('org.springframework.boot:spring-boot-starter-web')
+	
+	compile 'com.google.api-client:google-api-client:1.23.0'
+	compile group: 'com.google.guava', name: 'guava', version: '14.0.1'
+	compile group: 'com.google.http-client', name: 'google-http-client-jackson', version: '1.23.0'
 
 	compile('com.clivern:racter:1.0.4')
 	runtime('mysql:mysql-connector-java')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
+	testCompile('org.mockito:mockito-core:2.+')
+	testCompile('junit:junit:4.12')
 }
 
 

@@ -34,6 +34,7 @@ public class InicioController {
     		@RequestParam(value="hub.verify_token", defaultValue="") String hub_verify_token, 
     		@RequestParam(value="hub.challenge", defaultValue="") String hub_challenge ) throws IOException {
 		LOGGER.info("Ejecución: verifyToken() => GET");
+		LOGGER.info("Muestra de parámetros => \n\nhub.mode: " + hub_mode + "\n\nhub.verify_token: " + hub_verify_token + "\n\nhub.challenge: "+ hub_challenge);
 		
         BotPlatform platform = new BotPlatform("src/main/java/resources/config.properties");
         platform.getVerifyWebhook().setHubMode(hub_mode);
@@ -50,6 +51,7 @@ public class InicioController {
     @ResponseBody
     String webHook(@RequestBody String body) throws IOException, UnirestException, ParseException {
     	LOGGER.info("Ejecución: webHook() => POST");
+    	LOGGER.info("Muestra: " + body);
     	
         BotPlatform platform = new BotPlatform("src/main/java/resources/config.properties");
         platform.getBaseReceiver().set(body).parse();
@@ -65,6 +67,9 @@ public class InicioController {
             MessageTemplate message_tpl = platform.getBaseSender().getMessageTemplate();
             ButtonTemplate button_message_tpl = platform.getBaseSender().getButtonTemplate();
             String action = "";
+            
+            if(!quick_reply_payload.equals(""))
+            	LOGGER.info("getQuickReplyPayload: " + body);
             
             switch(quick_reply_payload) {
             	case "consulta_saldo_click": action = "consulta"; break;

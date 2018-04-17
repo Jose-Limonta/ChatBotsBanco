@@ -132,10 +132,11 @@ public class AdminMensajes extends AccionesMensajes{
     private void getChoiceActions(MessageTemplate message_tpl, String action) throws UnirestException, ParseException, JsonProcessingException {
     	if(!action.isEmpty()) {
     		seleccionaTarjeta( message_tpl );
-    		if(sesion.getAccion()== null && !action.equals("")) {
-    			
-				sesion.setAccion(action);
-				setEditSesion(sesion);
+    		if(sesion.getAccion() == null && !action.equals("") ) {
+    			if(!action.equals("") || action != "") {
+    				//sesion.setAccion(action);
+    				//setEditSesion(sesion);
+    			}
     		}
     	}
     	

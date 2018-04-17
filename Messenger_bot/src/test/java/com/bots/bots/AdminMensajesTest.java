@@ -77,6 +77,12 @@ public class AdminMensajesTest extends TestCase {
 				+ "}]"
 			+ "}]"
 		+ "}";
+	
+	
+	@Test
+	public void testPostFailedWithBadJSON() throws Exception{
+		
+	}
 		
 	@Test
 	public void testSelectionQuickReply() throws Exception {

@@ -61,11 +61,11 @@ public class AdminMensajes extends AccionesMensajes{
 		if(text.split(" ").length == 2) {
 			short accion_by_non_register_user = 0;
 			
-			if(text.split(" ")[1].length() == 3)
+			if(text.split(" ")[1].length() == 3) {
 				accion_by_non_register_user = 1;
-			
-			sesion.setRegistro(accion_by_non_register_user);
-			setEditSesion(sesion);
+				sesion.setRegistro(accion_by_non_register_user);
+				setEditSesion(sesion);
+			}
 			
 		}else if(text.split(" ").length == 3) {
 			if( getValidaDatosTransferencia( text ) ) {
@@ -153,11 +153,11 @@ public class AdminMensajes extends AccionesMensajes{
 	    			tarjeta = user.getTarjetasList().get(i).getNtarjeta();
 	    			
 	    			if(sesion.getAccion() == "consulta") {
-	    				sesion.setAccion("");
-	    				setEditSesion(sesion);
+	    				//sesion.setAccion("");
+	    				//setEditSesion(sesion);
 	    			}else if(sesion.getAccion() == "transferencia") {
-	    				sesion.setAccion("");
-	    				setEditSesion(sesion);
+	    				//sesion.setAccion("");
+	    				//setEditSesion(sesion);
 	    			}
 	    			
 	    		}

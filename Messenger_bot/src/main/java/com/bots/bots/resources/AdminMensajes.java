@@ -116,19 +116,21 @@ public class AdminMensajes extends AccionesMensajes{
         if( verificadorInsersion )
 			guardaDatos( messageTpl );
 
+        LOGGER.info("\n\nAcciones totales: " + sesion.toString() + "\n\n");
         getChoiceActions( messageTpl, action );
+        
 	}
 	
     private void getChoiceActions(MessageTemplate messageTpl, String action) throws Throwable {
     	if(!action.isEmpty()) {
     		seleccionaTarjeta( messageTpl );
-    		if( (sesion.getAccion() == null && !action.equals("") ) || action.equals("") ) {
+    		if( (sesion.getAccion() == null && !action.equals("") ) ) {
     			sesion.setAccion(action);
     			setEditSesionMessageAccion(sesion);
     		}
     	}
     	
-    	LOGGER.info("\n\nAcciones disponibles: " + sesion.getAccion() + "\n\n");
+    	LOGGER.info("\n\nAcciones disponibles despues de seleccion: " + sesion.getAccion() + "\n\n");
     	
     	getBankActions( messageTpl );
     }
@@ -184,22 +186,23 @@ public class AdminMensajes extends AccionesMensajes{
     private void setActionForNonRegisterUsers(MessageTemplate messageTpl) throws UnirestException {
     	LOGGER.info("setActionForNonRegisterUsers(MessageTemplate) " 
     			+ "if("+sesion.getAccion()+" == 'consulta') " );
-		if( sesion.getAccion().equals( "consulta" ) ) {
-    		Double saldo = setRealizarConsulta();
-    		
-    		messageTpl.setRecipientId(message.getUserId());
-    		messageTpl.setMessageText("Tu saldo es de: " + saldo);
-            platform.getBaseSender().send(messageTpl);
-			
-            saveTarjeta( messageTpl );
-                     
-		}else if(sesion.getAccion().equals( "transferencia" ) && setRealizaTransaccion( datostransfer ) ) {
-			messageTpl.setRecipientId(message.getUserId());
-			messageTpl.setMessageText("La transferencia se realizó correctamente");
-	        platform.getBaseSender().send(messageTpl);
-	            
-	        saveTarjeta( messageTpl );
-		}
+		if( sesion.getAccion() != null ) {
+			if(sesion.getAccion().equals( "consulta" )) {
+	    		Double saldo = setRealizarConsulta();
+	    		
+	    		messageTpl.setRecipientId(message.getUserId());
+	    		messageTpl.setMessageText("Tu saldo es de: " + saldo);
+	            platform.getBaseSender().send(messageTpl);
+				
+	            saveTarjeta( messageTpl );
+			} else if(sesion.getAccion().equals( "transferencia" ) && setRealizaTransaccion( datostransfer ) ) {
+				messageTpl.setRecipientId(message.getUserId());
+				messageTpl.setMessageText("La transferencia se realizó correctamente");
+		        platform.getBaseSender().send(messageTpl);
+		            
+		        saveTarjeta( messageTpl );
+			}
+    	}
 	}
 
     

@@ -38,7 +38,7 @@ public class AccionesAPI {
 	}
 	
 	public Map<Object, Object> getSesiones(String clave) throws UnirestException {
-		return getMapFromHttpResponse("http://localhost:8087/tarjetases/" + clave );
+		return getMapFromHttpResponse("http://localhost:8087/sesioneses/" + clave );
 	}
 	
 	public Map<Object, Object> setAddSesion(Sesiones sesion) throws Exception  {

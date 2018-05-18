@@ -96,9 +96,10 @@ public class Sesiones implements Serializable{
         return ((this.idSesion == null && other.idSesion != null) || (this.idSesion != null && !this.idSesion.equals(other.idSesion))) ? false : true;
     }
 
-    @Override
-    public String toString() {
-        return "guissa.entities.Sesiones[ idSesion=" + idSesion + " ]";
-    }
-    
+	@Override
+	public String toString() {
+		return "Sesiones [idSesion=" + idSesion + ", accion=" + accion + ", fecha=" + fecha + ", registro=" + registro
+				+ "]";
+	}
+
 }

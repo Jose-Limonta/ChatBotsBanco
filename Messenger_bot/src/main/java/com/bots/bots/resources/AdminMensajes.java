@@ -50,7 +50,7 @@ public class AdminMensajes extends AccionesMensajes{
 			sesion.setIdSesion(message.getUserId());
 			sesion.setRegistro( ( short ) 0);
 			sesion.setFecha(new Date());
-			setAddSesion(sesion);
+			setAddSesionMessageAccion(sesion);
 		}
 		
 		LOGGER.info("Ejecutando => setConfiguration('String, MessageReceivedWebhook, BotPlatform'");
@@ -65,7 +65,7 @@ public class AdminMensajes extends AccionesMensajes{
 			if(text.split(" ")[1].length() == 3) {
 				accionByNonRegisterUser = 1;
 				sesion.setRegistro(accionByNonRegisterUser);
-				setEditSesion(sesion);
+				setEditSesionMessageAccion(sesion);
 			}
 			
 		}else if(text.split(" ").length == 3 && getValidaDatosTransferencia( text ) ) {
@@ -124,7 +124,7 @@ public class AdminMensajes extends AccionesMensajes{
     		seleccionaTarjeta( messageTpl );
     		if( (sesion.getAccion() == null && !action.equals("") ) || action.equals("") ) {
     			sesion.setAccion(action);
-    			setEditSesion(sesion);
+    			setEditSesionMessageAccion(sesion);
     		}
     	}
     	
@@ -147,7 +147,7 @@ public class AdminMensajes extends AccionesMensajes{
     		messageTpl.setRecipientId(message.getUserId());
     		messageTpl.setMessageText("Dame tu número de cuenta Banamex y tu clave de acceso separado por espacio");
             sesion.setRegistro( (short ) 1);
-            setEditSesion(sesion);
+            setEditSesionMessageAccion(sesion);
             
             platform.getBaseSender().send(messageTpl);	            
 
@@ -155,7 +155,7 @@ public class AdminMensajes extends AccionesMensajes{
         	messageTpl.setRecipientId(message.getUserId());
         	messageTpl.setMessageText("Dame tu número de cuenta Bancomer");
             sesion.setRegistro( (short ) 1);
-            setEditSesion(sesion);
+            setEditSesionMessageAccion(sesion);
             
             platform.getBaseSender().send(messageTpl);
 

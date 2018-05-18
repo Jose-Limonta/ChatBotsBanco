@@ -2,5 +2,5 @@ projectKey=Messenger_bot
 serverUrl=http://localhost:9000
 serverVersion=6.7.3.38370
 dashboardUrl=http://localhost:9000/dashboard/index/Messenger_bot
-ceTaskId=AWN0MN3mAhdKM-VtOTsL
-ceTaskUrl=http://localhost:9000/api/ce/task?id=AWN0MN3mAhdKM-VtOTsL
+ceTaskId=AWN0q-B8AhdKM-VtOTsS
+ceTaskUrl=http://localhost:9000/api/ce/task?id=AWN0q-B8AhdKM-VtOTsS

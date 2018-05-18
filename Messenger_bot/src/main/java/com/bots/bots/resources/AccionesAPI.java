@@ -41,13 +41,14 @@ public class AccionesAPI {
 		return getMapFromHttpResponse("http://localhost:8087/tarjetases/" + clave );
 	}
 	
-	public Map<Object, Object> setAddSesion(Sesiones sesion) throws Throwable {
+	public Map<Object, Object> setAddSesion(Sesiones sesion) throws Exception  {
 		Unirest.clearDefaultHeaders();
 	    ObjectMapper mapper = new ObjectMapper();
+	    String bodyValue = mapper.writeValueAsString(sesion);
 		HttpResponse<String> response = Unirest.post("http://localhost:8087/sesioneses")
 				  .header(Constantes.CONTENT_TYPE, Constantes.APPLICATION_JSON_VALUE)
 				  .header(Constantes.CACHE_CONTROL, Constantes.CACHE_CONTROL_NO_CACHE)
-				  .body(mapper.writeValueAsString(sesion))
+				  .body(bodyValue)
 				  .asString();
 
       if (!response.getBody().isEmpty()) {

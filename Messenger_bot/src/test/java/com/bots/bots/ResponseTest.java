@@ -59,16 +59,6 @@ public class ResponseTest extends TestCase {
 		assertEquals(SAMPLE2, response.parseAsString());
 	}
 
-	@Test
-	public void testStatusCode_negative_dontThrowException() throws Exception {
-		subtestStatusCode_negative(false);
-	}
-
-	@Test
-	public void testStatusCode_negative_throwException() throws Exception {
-		subtestStatusCode_negative(true);
-	}
-
 	public void subtestStatusCode_negative(boolean throwExceptionOnExecuteError) throws Exception {
 		HttpTransport transport = new MockHttpTransport() {
 			@Override
@@ -79,12 +69,10 @@ public class ResponseTest extends TestCase {
 		HttpRequest request = transport.createRequestFactory().buildGetRequest(HttpTesting.SIMPLE_GENERIC_URL);
 		request.setThrowExceptionOnExecuteError(throwExceptionOnExecuteError);
 		try {
-			// HttpResponse converts a negative status code to zero
 			HttpResponse response = request.execute();
 			assertEquals(0, response.getStatusCode());
 			assertFalse(throwExceptionOnExecuteError);
 		} catch (HttpResponseException e) {
-			// exception should be thrown only if throwExceptionOnExecuteError is true
 			assertTrue(throwExceptionOnExecuteError);
 			assertEquals(0, e.getStatusCode());
 		}
@@ -152,35 +140,15 @@ public class ResponseTest extends TestCase {
 
 	@Test
 	public void testParseAs_classNoContent() throws Exception {
-		final MockLowLevelHttpResponse result = new MockLowLevelHttpResponse();
-
-		for (final int status : new int[] { HttpStatusCodes.STATUS_CODE_NO_CONTENT,
-				HttpStatusCodes.STATUS_CODE_NOT_MODIFIED, 102 }) {
-			HttpTransport transport = new MockHttpTransport() {
-				@Override
-				public LowLevelHttpRequest buildRequest(String method, final String url) throws IOException {
-					return new MockLowLevelHttpRequest() {
-						@Override
-						public LowLevelHttpResponse execute() throws IOException {
-							result.setStatusCode(status);
-							result.setContentType(null);
-							result.setContent(new ByteArrayInputStream(new byte[0]));
-							return result;
-						}
-					};
-				}
-			};
-
-			// Confirm that 'null' is returned when getting the response object of a
-			// request with no message body.
-			Object parsed = transport.createRequestFactory().buildGetRequest(HttpTesting.SIMPLE_GENERIC_URL)
-					.setThrowExceptionOnExecuteError(false).execute().parseAs(Object.class);
-			assertNull(parsed);
-		}
+		parseAsNoContent(true);
 	}
 
 	@Test
 	public void testParseAs_typeNoContent() throws Exception {
+		parseAsNoContent(false);
+	}
+	
+	private void parseAsNoContent(boolean type) throws IOException {
 		final MockLowLevelHttpResponse result = new MockLowLevelHttpResponse();
 
 		for (final int status : new int[] { HttpStatusCodes.STATUS_CODE_NO_CONTENT,
@@ -200,11 +168,16 @@ public class ResponseTest extends TestCase {
 				}
 			};
 
-			// Confirm that 'null' is returned when getting the response object of a
-			// request with no message body.
-			Object parsed = transport.createRequestFactory().buildGetRequest(HttpTesting.SIMPLE_GENERIC_URL)
-					.setThrowExceptionOnExecuteError(false).execute().parseAs((Type) Object.class);
-			assertNull(parsed);
+			if( type ) {
+				Object parsed = transport.createRequestFactory().buildGetRequest(HttpTesting.SIMPLE_GENERIC_URL)
+					.setThrowExceptionOnExecuteError(false).execute().parseAs(Object.class);
+				assertNull(parsed);
+			}else {
+				Object parsed = transport.createRequestFactory().buildGetRequest(HttpTesting.SIMPLE_GENERIC_URL)
+						.setThrowExceptionOnExecuteError(false).execute().parseAs((Type) Object.class);
+				assertNull(parsed);
+			}
+			
 		}
 	}
 

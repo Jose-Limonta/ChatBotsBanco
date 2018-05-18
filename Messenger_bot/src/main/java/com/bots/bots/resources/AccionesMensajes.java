@@ -15,10 +15,11 @@ import com.bots.bots.model.Usuarios;
 import com.clivern.racter.receivers.webhook.MessageReceivedWebhook;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
-public class AccionesMensajes {
+public class AccionesMensajes extends AccionesAPI{
 	
 	private static final Double CONSULTA = 3009.54;
-	
+	private String[] tipoTarjetasAv = {"","Aereolinea", "Aereolinea","American Express",
+    		"Visa", "Master Card","Discovery Card", "Industria del petróleo","Telecomunicaciones"};	
 	private static final Log LOGGER = LogFactory.getLog(AccionesMensajes.class);
 	
 	protected boolean setRealizaTransaccion( String[] datostransfer) {
@@ -32,27 +33,24 @@ public class AccionesMensajes {
 	protected boolean insertaTarjeta(MessageReceivedWebhook message, Usuarios user, String tarjeta) throws Throwable {		
 		LOGGER.info("Ejecucion: insertaTarjeta(MessageReceivedWebhook, Usuarios, String)");
 		
-    	AccionesAPI accion = new  AccionesAPI();
 		Tarjetas objtarjeta = getTarjeta(message, tarjeta);
-    	boolean inserto = false;
 		
 		if( !user.getIduser().isEmpty() ) {	    			
-			Map<Object,Object> tarjetaAgregada = accion.setTarjeta(objtarjeta);
-			if(tarjetaAgregada.get("fecha") != "") 
-				inserto = true;	    			
+			Map<Object,Object> tarjetaAgregada = setTarjeta(objtarjeta);
+			if(!tarjetaAgregada.get("fecha").equals("")) 
+				return true;	    			
 		}
-		return inserto;
+		return false;
     }
     
 	protected Usuarios insertaUser(Usuarios usuario) throws Throwable  {
 		LOGGER.info("Ejecucion: insertaUser(Usuarios)");
 		
-    	AccionesAPI accion = new  AccionesAPI();
-    	Map<Object,Object> usuarioAgregado = accion.setUsuarios(usuario);
+    	Map<Object,Object> usuarioAgregado = setUsuarios(usuario);
     	if(usuarioAgregado.isEmpty())
     		return new Usuarios();
     	
-    	return accion.convertMapToUsuarios(usuarioAgregado, usuario.getIduser());
+    	return convertMapToUsuarios(usuarioAgregado, usuario.getIduser());
     }
 	
 	protected boolean getValidaDatosTransferencia(String texto){
@@ -66,7 +64,7 @@ public class AccionesMensajes {
 		boolean verificador = true;
 		for(char caracter : cuenta.toCharArray())	
 			if(!Character.isDigit(caracter)) 
-				verificador = false;			
+				verificador = false;
 		
 		return verificador;
     }
@@ -89,7 +87,7 @@ public class AccionesMensajes {
     	Tarjetas objtarjeta = new Tarjetas();
     	if(iduser != null && !tarjeta.isEmpty()) {
 	    	String ttarjeta  = getTipoTarjeta( tarjeta.substring(0, 1) );
-	    		
+	    	
 		    objtarjeta.setFecha( getFechaOfStringToDateFromat() );
 		    objtarjeta.setIduser(iduser);
 		    objtarjeta.setNtarjeta(tarjeta);
@@ -103,30 +101,16 @@ public class AccionesMensajes {
     
     protected String getTipoTarjeta(String tarjeta) {
     	LOGGER.info("Ejecucion: getTipoTarjeta(String)");
-    	
-    	String ttarjeta  = "";
-		switch(tarjeta.substring(0, 1)) {
-			case "1": ttarjeta = "Aereolinea"; break;
-			case "2": ttarjeta = "Aereolinea"; break;
-			case "3": ttarjeta = "American Express"; break;
-			case "4": ttarjeta = "Visa"; break;
-			case "5": ttarjeta = "Master Card"; break;
-			case "6": ttarjeta = "Discovery Card"; break;
-			case "7": ttarjeta = "Industria del petróleo"; break;
-			case "8": ttarjeta = "Telecomunicaciones"; break;
-			default: ttarjeta = "No reconocida"; break;
-		}
-		return ttarjeta;
+    	int posision = Integer.parseInt( tarjeta.substring(0, 1) );
+    	return tipoTarjetasAv[ posision ];
     }
     
     protected Usuarios getUsuarioFromRegister(String clave)  throws Throwable {
     	LOGGER.info("Ejecucion: getUsuarioFromRegister(String)");
-    	
-    	AccionesAPI accion = new  AccionesAPI();
-    	Map<Object,Object> mapausuario = accion.getClienteByClave(clave);
+    	Map<Object,Object> mapausuario = getClienteByClave(clave);
     	if(mapausuario.isEmpty())
     		return new Usuarios();
-    	return accion.convertMapToUsuarios(mapausuario, clave);
+    	return convertMapToUsuarios(mapausuario, clave);
     }
     
     protected Date getFechaOfStringToDateFromat() throws ParseException{
@@ -138,19 +122,16 @@ public class AccionesMensajes {
     }
     
     protected int getSesionesExistentes(String clave) throws UnirestException{
-    	AccionesAPI accion = new AccionesAPI();
-    	return accion.getSesiones( clave ).size();
+    	return getSesiones( clave ).size();
     }
     
-    protected boolean setAddSesion(Sesiones sesion) throws Throwable {
-    	AccionesAPI accion = new AccionesAPI();
-    	Map<Object, Object> sesionRetorno = accion.setAddSesion(sesion);
+    protected boolean setAddSesionMessageAccion(Sesiones sesion) throws Throwable {
+    	Map<Object, Object> sesionRetorno = setAddSesion(sesion);
     	return sesionRetorno.containsKey("message") ? false : true;    	
     }
     
-    protected boolean setEditSesion(Sesiones sesion) throws Throwable {
-    	AccionesAPI accion = new AccionesAPI();
-    	Map<Object, Object> sesionRetorno = accion.setEditSesion(sesion);
+    protected boolean setEditSesionMessageAccion(Sesiones sesion) throws Throwable {
+    	Map<Object, Object> sesionRetorno = setEditSesion(sesion);
     	return sesionRetorno.containsKey("message") ? false : true;    	
     }
 }

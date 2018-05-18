@@ -89,15 +89,11 @@ public class Sesiones implements Serializable{
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof Sesiones)) {
             return false;
         }
         Sesiones other = (Sesiones) object;
-        if ((this.idSesion == null && other.idSesion != null) || (this.idSesion != null && !this.idSesion.equals(other.idSesion))) {
-            return false;
-        }
-        return true;
+        return ((this.idSesion == null && other.idSesion != null) || (this.idSesion != null && !this.idSesion.equals(other.idSesion))) ? false : true;
     }
 
     @Override

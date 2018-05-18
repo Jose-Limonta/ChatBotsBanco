@@ -36,7 +36,9 @@ public class TarjetasServiceImp implements TarjetasService{
 	@Override
 	public void deleteTarjetas(String idtarjeta) {
 		Optional<Tarjetas> tarjeta = getTarjetaById(idtarjeta);
-		tarjetaRepository.delete(tarjeta.get());		
+		if(tarjeta.isPresent()) {
+			tarjetaRepository.delete(tarjeta.get());
+		}
 	}
 
 }

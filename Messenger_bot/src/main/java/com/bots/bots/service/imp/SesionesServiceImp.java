@@ -36,7 +36,9 @@ public class SesionesServiceImp implements SesionesService{
 	@Override
 	public void deleteSesiones(String idsesion) {
 		Optional<Sesiones> sesion = getSesionById(idsesion);
-		sesionesRepository.delete(sesion.get());
+		if(sesion.isPresent()) {
+			sesionesRepository.delete(sesion.get());
+		}
 	}
 
 }

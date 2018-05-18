@@ -105,10 +105,7 @@ public class Transacciones implements Serializable{
             return false;
         }
         Transacciones other = (Transacciones) object;
-        if ((this.idtransaccion == null && other.idtransaccion != null) || (this.idtransaccion != null && !this.idtransaccion.equals(other.idtransaccion))) {
-            return false;
-        }
-        return true;
+        return ((this.idtransaccion == null && other.idtransaccion != null) || (this.idtransaccion != null && !this.idtransaccion.equals(other.idtransaccion)))  ? false : true;
     }
 
     @Override

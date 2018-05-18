@@ -118,10 +118,7 @@ public class Tarjetas implements Serializable{
             return false;
         }
         Tarjetas other = (Tarjetas) object;
-        if ((this.ntarjeta == null && other.ntarjeta != null) || (this.ntarjeta != null && !this.ntarjeta.equals(other.ntarjeta))) {
-            return false;
-        }
-        return true;
+        return ((this.ntarjeta == null && other.ntarjeta != null) || (this.ntarjeta != null && !this.ntarjeta.equals(other.ntarjeta))) ? false : true;
     }
 
     @Override

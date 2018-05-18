@@ -36,7 +36,9 @@ public class UsuariosServiceImp implements UsuariosService{
 	@Override
 	public void deleteUsuario(String iduser) {
 		Optional<Usuarios> usuario = getUsuarioById(iduser);
-		usuarioRepository.delete(usuario.get());		
+		if( usuario.isPresent() ) {
+			usuarioRepository.delete(usuario.get());
+		}
 	}
 
 }

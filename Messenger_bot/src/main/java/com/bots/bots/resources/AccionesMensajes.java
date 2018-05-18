@@ -8,62 +8,56 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONException;
 
 import com.bots.bots.model.Sesiones;
 import com.bots.bots.model.Tarjetas;
 import com.bots.bots.model.Usuarios;
 import com.clivern.racter.receivers.webhook.MessageReceivedWebhook;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
 public class AccionesMensajes {
 	
+	private static final Double CONSULTA = 3009.54;
+	
 	private static final Log LOGGER = LogFactory.getLog(AccionesMensajes.class);
 	
-	protected boolean setRealizaTransaccion(String[] datos_de_transaccion) {
-		return true;
+	protected boolean setRealizaTransaccion( String[] datostransfer) {
+		return datostransfer.length > 0 ? true : false;
 	}
 	
 	protected Double setRealizarConsulta() {
-		return 3009.54;
+		return CONSULTA;
 	}
 	
-	protected boolean insertaTarjeta(MessageReceivedWebhook message,
-			Usuarios user, String tarjeta) throws ParseException, UnirestException {		
+	protected boolean insertaTarjeta(MessageReceivedWebhook message, Usuarios user, String tarjeta) throws Throwable {		
 		LOGGER.info("Ejecucion: insertaTarjeta(MessageReceivedWebhook, Usuarios, String)");
 		
     	AccionesAPI accion = new  AccionesAPI();
 		Tarjetas objtarjeta = getTarjeta(message, tarjeta);
-		
     	boolean inserto = false;
 		
 		if( !user.getIduser().isEmpty() ) {	    			
-			Map<Object,Object> tarjeta_agregada = accion.setTarjeta(objtarjeta);
-			if(tarjeta_agregada.get("fecha") != "") 
+			Map<Object,Object> tarjetaAgregada = accion.setTarjeta(objtarjeta);
+			if(tarjetaAgregada.get("fecha") != "") 
 				inserto = true;	    			
 		}
 		return inserto;
     }
     
-	protected Usuarios insertaUser(Usuarios usuario) 
-			throws JSONException, UnirestException, ParseException {
+	protected Usuarios insertaUser(Usuarios usuario) throws Throwable  {
 		LOGGER.info("Ejecucion: insertaUser(Usuarios)");
 		
     	AccionesAPI accion = new  AccionesAPI();
-    	Map<Object,Object> usuario_agregado = accion.setUsuarios(usuario);
-    	if(usuario_agregado.isEmpty())
+    	Map<Object,Object> usuarioAgregado = accion.setUsuarios(usuario);
+    	if(usuarioAgregado.isEmpty())
     		return new Usuarios();
-    	Usuarios user = accion.convertMapToUsuarios(usuario_agregado, usuario.getIduser());
-    	return user;
+    	
+    	return accion.convertMapToUsuarios(usuarioAgregado, usuario.getIduser());
     }
 	
 	protected boolean getValidaDatosTransferencia(String texto){
-		String[] datos_transfer = texto.split(" ");
-		if( verifyStringToNumber( datos_transfer[0] ) && verifyStringToNumber( datos_transfer[2] ) ) 
-			return true;
-		
-		return false;
+		String[] datosTransfer = texto.split(" ");
+		return verifyStringToNumber( datosTransfer[0] ) && verifyStringToNumber( datosTransfer[2] ) ? true : false; 
 	}
     
     protected boolean verifyStringToNumber(String cuenta) {
@@ -88,24 +82,21 @@ public class AccionesMensajes {
 		return user;
     }
     
-    protected Tarjetas getTarjeta(MessageReceivedWebhook message, String tarjeta) 
-    		throws ParseException, UnirestException {
+    protected Tarjetas getTarjeta(MessageReceivedWebhook message, String tarjeta) throws Throwable {
     	LOGGER.info("Ejecucion: getTarjeta(MessageReceivedWebhook)");
     	
     	Usuarios iduser = getUsuarioFromRegister(message.getUserId());
     	Tarjetas objtarjeta = new Tarjetas();
-    	if(iduser != null ) {
-    		if(!tarjeta.isEmpty()) {
-	    		String ttarjeta  = getTipoTarjeta( tarjeta.substring(0, 1) );
+    	if(iduser != null && !tarjeta.isEmpty()) {
+	    	String ttarjeta  = getTipoTarjeta( tarjeta.substring(0, 1) );
 	    		
-		    	objtarjeta.setFecha( getFechaOfStringToDateFromat() );
-		    	objtarjeta.setIduser(iduser);
-		    	objtarjeta.setNtarjeta(tarjeta);
-		    	objtarjeta.setNbanco("Bancos");
-		    	objtarjeta.setTtarjeta(ttarjeta);
+		    objtarjeta.setFecha( getFechaOfStringToDateFromat() );
+		    objtarjeta.setIduser(iduser);
+		    objtarjeta.setNtarjeta(tarjeta);
+		    objtarjeta.setNbanco("Bancos");
+		    objtarjeta.setTtarjeta(ttarjeta);
 		    	
-		    	return objtarjeta;
-    		}
+		    return objtarjeta;    		
     	}
     	return objtarjeta;
     }
@@ -115,29 +106,27 @@ public class AccionesMensajes {
     	
     	String ttarjeta  = "";
 		switch(tarjeta.substring(0, 1)) {
-			case "1": ttarjeta = "Aereolinea";
-			case "2": ttarjeta = "Aereolinea";
-			case "3": ttarjeta = "American Express";
-			case "4": ttarjeta = "Visa";
-			case "5": ttarjeta = "Master Card";
-			case "6": ttarjeta = "Discovery Card";
-			case "7": ttarjeta = "Industria del petróleo";
-			case "8": ttarjeta = "Telecomunicaciones";
-			default: ttarjeta = "No reconocida";
+			case "1": ttarjeta = "Aereolinea"; break;
+			case "2": ttarjeta = "Aereolinea"; break;
+			case "3": ttarjeta = "American Express"; break;
+			case "4": ttarjeta = "Visa"; break;
+			case "5": ttarjeta = "Master Card"; break;
+			case "6": ttarjeta = "Discovery Card"; break;
+			case "7": ttarjeta = "Industria del petróleo"; break;
+			case "8": ttarjeta = "Telecomunicaciones"; break;
+			default: ttarjeta = "No reconocida"; break;
 		}
 		return ttarjeta;
     }
     
-    protected Usuarios getUsuarioFromRegister(String clave) 
-    		throws UnirestException, JSONException, ParseException {
+    protected Usuarios getUsuarioFromRegister(String clave)  throws Throwable {
     	LOGGER.info("Ejecucion: getUsuarioFromRegister(String)");
     	
     	AccionesAPI accion = new  AccionesAPI();
     	Map<Object,Object> mapausuario = accion.getClienteByClave(clave);
     	if(mapausuario.isEmpty())
     		return new Usuarios();
-    	Usuarios usuario = accion.convertMapToUsuarios(mapausuario, clave);
-    	return usuario;
+    	return accion.convertMapToUsuarios(mapausuario, clave);
     }
     
     protected Date getFechaOfStringToDateFromat() throws ParseException{
@@ -145,8 +134,7 @@ public class AccionesMensajes {
     	
     	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.US);    	
         Date parsed = format.parse( format.format( new Date() ) );
-        java.sql.Date sql = new java.sql.Date(parsed.getTime());
-        return sql;
+        return new java.sql.Date(parsed.getTime());
     }
     
     protected int getSesionesExistentes(String clave) throws UnirestException{
@@ -154,24 +142,16 @@ public class AccionesMensajes {
     	return accion.getSesiones( clave ).size();
     }
     
-    protected boolean setAddSesion(Sesiones sesion) throws UnirestException, JsonProcessingException {
+    protected boolean setAddSesion(Sesiones sesion) throws Throwable {
     	AccionesAPI accion = new AccionesAPI();
-    	Map<Object, Object> sesion_retorno = accion.setAddSesion(sesion);
-    	if(sesion_retorno.containsKey("message")) 
-    		return false;
-    	else
-    		return true;
-    	
+    	Map<Object, Object> sesionRetorno = accion.setAddSesion(sesion);
+    	return sesionRetorno.containsKey("message") ? false : true;    	
     }
     
-    protected boolean setEditSesion(Sesiones sesion) throws UnirestException, JsonProcessingException {
+    protected boolean setEditSesion(Sesiones sesion) throws Throwable {
     	AccionesAPI accion = new AccionesAPI();
-    	Map<Object, Object> sesion_retorno = accion.setEditSesion(sesion);
-    	if(sesion_retorno.containsKey("message")) 
-    		return false;
-    	else
-    		return true;
-    	
+    	Map<Object, Object> sesionRetorno = accion.setEditSesion(sesion);
+    	return sesionRetorno.containsKey("message") ? false : true;    	
     }
 }
 

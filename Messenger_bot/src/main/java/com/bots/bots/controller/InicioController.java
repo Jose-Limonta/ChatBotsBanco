@@ -1,7 +1,6 @@
 package com.bots.bots.controller;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.HashMap;
 
 
@@ -19,7 +18,6 @@ import com.clivern.racter.BotPlatform;
 import com.clivern.racter.receivers.webhook.*;
 
 import com.clivern.racter.senders.templates.*;
-import com.mashape.unirest.http.exceptions.UnirestException;
 
 @Controller
 public class InicioController {
@@ -30,26 +28,26 @@ public class InicioController {
 	@RequestMapping(method = RequestMethod.GET, value = "/webhook")
     @ResponseBody
     String verifyToken(
-    		@RequestParam(value="hub.mode", defaultValue="") String hub_mode, 
-    		@RequestParam(value="hub.verify_token", defaultValue="") String hub_verify_token, 
-    		@RequestParam(value="hub.challenge", defaultValue="") String hub_challenge ) throws IOException {
+    		@RequestParam(value="hub.mode", defaultValue="") String hubMode, 
+    		@RequestParam(value="hub.verify_token", defaultValue="") String hubVerifyToken, 
+    		@RequestParam(value="hub.challenge", defaultValue="") String hubChallenge ) throws IOException {
 		LOGGER.info("Ejecución: verifyToken() => GET");
-		LOGGER.info("Muestra de parámetros => \n\nhub.mode: " + hub_mode + "\n\nhub.verify_token: " + hub_verify_token + "\n\nhub.challenge: "+ hub_challenge);
+		LOGGER.info("Muestra de parámetros => \n\nhub.mode: " + hubMode + "\n\nhub.verify_token: " + hubVerifyToken + "\n\nhub.challenge: "+ hubChallenge);
 		
         BotPlatform platform = new BotPlatform("src/main/java/resources/config.properties");
-        platform.getVerifyWebhook().setHubMode(hub_mode);
-        platform.getVerifyWebhook().setHubVerifyToken(hub_verify_token);
-        platform.getVerifyWebhook().setHubChallenge(hub_challenge);
+        platform.getVerifyWebhook().setHubMode(hubMode);
+        platform.getVerifyWebhook().setHubVerifyToken(hubVerifyToken);
+        platform.getVerifyWebhook().setHubChallenge(hubChallenge);
 
         if( platform.getVerifyWebhook().challenge() )
-            return ( hub_challenge != "" ) ? hub_challenge : "";
+            return ( hubChallenge != "" ) ? hubChallenge : "";
 
         return "Verification token mismatch";
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/webhook")
     @ResponseBody
-    String webHook(@RequestBody String body) throws IOException, UnirestException, ParseException {
+    String webHook(@RequestBody String body) throws Throwable {
     	LOGGER.info("Ejecución: webHook() => POST");
     	LOGGER.info("Muestra: " + body);
     	
@@ -61,25 +59,25 @@ public class InicioController {
         		.getMessages();
         
         for (MessageReceivedWebhook message : messages.values()) {
-            String quick_reply_payload = (message.hasQuickReplyPayload()) ? message.getQuickReplyPayload() : "";
+            String quickReplyPayload = (message.hasQuickReplyPayload()) ? message.getQuickReplyPayload() : "";
             
             String text = message.getMessageText();
-            MessageTemplate message_tpl = platform.getBaseSender().getMessageTemplate();
-            ButtonTemplate button_message_tpl = platform.getBaseSender().getButtonTemplate();
+            MessageTemplate messageTpl = platform.getBaseSender().getMessageTemplate();
+            ButtonTemplate buttonMessageTpl = platform.getBaseSender().getButtonTemplate();
             String action = "";
             
-            if(!quick_reply_payload.equals(""))
+            if(!quickReplyPayload.equals(""))
             	LOGGER.info("getQuickReplyPayload: " + body);
             
-            switch(quick_reply_payload) {
+            switch(quickReplyPayload) {
             	case "consulta_saldo_click": action = "consulta"; break;
             	case "transferencia_click": action = "transferencia"; break;
+            	default: action = "";
             }
             
-            adminmensajes.setConfiguration(quick_reply_payload, message, platform);
-            adminmensajes.messagesExecute(text, message_tpl, button_message_tpl, action);
+            adminmensajes.setConfiguration(quickReplyPayload, message, platform);
+            adminmensajes.messagesExecute(text, messageTpl, buttonMessageTpl, action);
 
-            return "ok";
         }
         
         return "bla";

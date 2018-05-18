@@ -104,10 +104,7 @@ public class Usuarios implements Serializable{
             return false;
         }
         Usuarios other = (Usuarios) object;
-        if ((this.iduser == null && other.iduser != null) || (this.iduser != null && !this.iduser.equals(other.iduser))) {
-            return false;
-        }
-        return true;
+        return ((this.iduser == null && other.iduser != null) || (this.iduser != null && !this.iduser.equals(other.iduser)))  ? false : true;
     }
 
     @Override

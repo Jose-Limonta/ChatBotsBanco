@@ -5,6 +5,7 @@ import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,7 @@ public class InicioControllerTest extends TestCase {
 	private MockMvc mockServicio;
 	
 	@Test
+	@Ignore
 	public void testDoGetAction() throws Exception{
 		MultiValueMap<String, String> parametros = new LinkedMultiValueMap<>();
 		parametros.add("hub.mode", "subscribe");
@@ -53,7 +55,7 @@ public class InicioControllerTest extends TestCase {
 		}		
 	}
 	
-	public final String JSONPOST_SETTEXT = "{"
+	public final String postSetTextJSON = "{"
 				+ "\"object\":\"page\","
 				+ "\"entry\":[{"
 					+ "\"id\":\"196856110912106\","
@@ -76,11 +78,12 @@ public class InicioControllerTest extends TestCase {
 			+ "}";
 	
 	@Test
+	@Ignore
 	public void testPostAction() throws Exception {
 		MockHttpServletRequestBuilder reqMock = MockMvcRequestBuilders
 				.post("/webhook")
 				.accept(MediaType.TEXT_PLAIN)
-				.content(JSONPOST_SETTEXT)
+				.content( postSetTextJSON )
 				.contentType(MediaType.TEXT_PLAIN);
 		
 		MvcResult resultadoMock = mockServicio.perform(reqMock).andReturn();

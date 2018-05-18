@@ -2,8 +2,7 @@ package com.bots.bots;
 
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +24,11 @@ import junit.framework.TestCase;
 @SpringBootTest
 @AutoConfigureMockMvc
 public class AdminMensajesTest extends TestCase {
-
-	private static final Log LOGGER = LogFactory.getLog(AdminMensajesTest.class);
 	
 	@Autowired
 	private MockMvc mockServicio;
 	
-	public final String JSONPOST_SOURCETEXT = "{"
+	public final String postSourceTextJSON = "{"
 			+ "\"object\":\"page\","
 			+ "\"entry\":[{"
 				+ "\"id\":\"196856110912106\","
@@ -53,7 +50,7 @@ public class AdminMensajesTest extends TestCase {
 			+ "}]"
 		+ "}";
 	
-	public final String JSON_QUICK_REPLY_PAYLOAD = "{"
+	public final String quickReplyPayLoadJSON = "{"
 			+ "\"object\":\"page\","
 			+ "\"entry\":[{"
 				+ "\"id\":\"196856110912106\","
@@ -80,16 +77,18 @@ public class AdminMensajesTest extends TestCase {
 	
 	
 	@Test
+	@Ignore
 	public void testPostFailedWithBadJSON() throws Exception{
-		
+		// carga con un mal json, aun no se configura
 	}
 		
 	@Test
+	@Ignore
 	public void testSelectionQuickReply() throws Exception {
 		MockHttpServletRequestBuilder reqMock = MockMvcRequestBuilders
 				.post("/webhook")
 				.accept(MediaType.TEXT_PLAIN)
-				.content(JSON_QUICK_REPLY_PAYLOAD)
+				.content(quickReplyPayLoadJSON)
 				.contentType(MediaType.TEXT_PLAIN);
 		
 		MvcResult resultadoMock = mockServicio.perform(reqMock).andReturn();
@@ -103,11 +102,12 @@ public class AdminMensajesTest extends TestCase {
 	}
 	
 	@Test
+	@Ignore
 	public void testPostActionSetTransaccion() throws Exception {
 		MockHttpServletRequestBuilder reqMock = MockMvcRequestBuilders
 				.post("/webhook")
 				.accept(MediaType.TEXT_PLAIN)
-				.content(JSONPOST_SOURCETEXT)
+				.content(postSourceTextJSON)
 				.contentType(MediaType.TEXT_PLAIN);
 		
 		MvcResult resultadoMock = mockServicio.perform(reqMock).andReturn();

@@ -5,7 +5,6 @@ import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -16,7 +15,6 @@ import com.clivern.racter.BotPlatform;
 import com.clivern.racter.receivers.webhook.MessageReceivedWebhook;
 import com.clivern.racter.senders.templates.ButtonTemplate;
 import com.clivern.racter.senders.templates.MessageTemplate;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
 public class AdminMensajes extends AccionesMensajes{
@@ -24,9 +22,9 @@ public class AdminMensajes extends AccionesMensajes{
 	private static final Log LOGGER = LogFactory.getLog(AdminMensajes.class);
 	
 	private String tarjeta = "";	
-	private boolean verificador_insersion = false;
-	private int numero_de_tarjetas = 0;
-	private int i = 0;
+	private boolean verificadorInsersion = false;
+	private int numeroDeTarjetas = 0;
+	private Integer identificador = 0;
 	private String[] datostransfer;
 	private boolean realizatransfer = false;
 	
@@ -41,7 +39,7 @@ public class AdminMensajes extends AccionesMensajes{
 	private Sesiones sesion;
 	
 	
-	public void setConfiguration(String reply, MessageReceivedWebhook message, BotPlatform platform) throws UnirestException, JsonProcessingException {
+	public void setConfiguration(String reply, MessageReceivedWebhook message, BotPlatform platform) throws Throwable {
 		this.reply = reply;
 		this.message = message;
 		this.platform = platform;
@@ -54,32 +52,32 @@ public class AdminMensajes extends AccionesMensajes{
 			sesion.setFecha(new Date());
 			setAddSesion(sesion);
 		}
+		
+		LOGGER.info("Ejecutando => setConfiguration('String, MessageReceivedWebhook, BotPlatform'");
 	}
 	
-	private void setInitializrCredentials(String text) throws JsonProcessingException, UnirestException {
+	private void setInitializrCredentials(String text) throws Throwable {
+		
 		
 		if(text.split(" ").length == 2) {
-			short accion_by_non_register_user = 0;
+			short accionByNonRegisterUser = 0;
 			
 			if(text.split(" ")[1].length() == 3) {
-				accion_by_non_register_user = 1;
-				sesion.setRegistro(accion_by_non_register_user);
+				accionByNonRegisterUser = 1;
+				sesion.setRegistro(accionByNonRegisterUser);
 				setEditSesion(sesion);
 			}
 			
-		}else if(text.split(" ").length == 3) {
-			if( getValidaDatosTransferencia( text ) ) {
-				datostransfer = text.split(" ");
-				realizatransfer = true;
-			}
+		}else if(text.split(" ").length == 3 && getValidaDatosTransferencia( text ) ) {
+			datostransfer = text.split(" ");
+			realizatransfer = true;
 		}
 		
 		LOGGER.info("Método: setInitializrCredentials(Stirng) => Variable de sesión: " + sesion.getRegistro() );
 	}
 	
-	public void messagesExecute(String text, MessageTemplate message_tpl, 
-			ButtonTemplate button_message_tpl, String action) 
-					throws UnirestException, ParseException, JsonProcessingException {
+	public void messagesExecute(String text, MessageTemplate messageTpl, 
+			ButtonTemplate buttonMessageTpl, String action) throws Throwable {
 		
 		setInitializrCredentials(text);
          
@@ -90,139 +88,117 @@ public class AdminMensajes extends AccionesMensajes{
         if( cuenta.length() == 16 && verifyStringToNumber(cuenta) 
         		&& text.substring(text.length() -3, text.length()).replace(" ", "").contains("ok") ){
         	tarjeta = cuenta;
-        	message_tpl.setRecipientId(message.getUserId());
-            message_tpl.setMessageText("Escribe el número de tarjeta a transferir, el monto y tu clave de acceso, separado por espacios");
-            platform.getBaseSender().send(message_tpl);
-            verificador_insersion = true;
+        	messageTpl.setRecipientId(message.getUserId());
+        	messageTpl.setMessageText("Escribe el número de tarjeta a transferir, el monto y tu clave de acceso, separado por espacios");
+            platform.getBaseSender().send(messageTpl);
+            verificadorInsersion = true;
             
-        }else if( text.toLowerCase().contains("hola") ){
-        	
-        	message_tpl.setRecipientId(message.getUserId());
-            message_tpl.setMessageText("Hola amigo, ¿en qué puedo ayudarte?");
-            message_tpl.setQuickReply("text", "Consulta saldo", "consulta_saldo_click", "");
-            message_tpl.setQuickReply("text", "Transferencia", "transferencia_click", "");
-            message_tpl.setQuickReply("text", "Agregar tarjeta", "add_tarjeta_click", "");
-            message_tpl.setQuickReply("text", "Eliminar tarjeta", "delete_tarjeta_click", "");
-            platform.getBaseSender().send(message_tpl);
+        }else if( text.toLowerCase().contains("hola") || 
+        		text.toLowerCase().contains("acción") || 
+        		text.toLowerCase().contains("accion") ){
 
-        }else if( text.toLowerCase().contains("acción") || text.toLowerCase().contains("accion") ){
-
-            message_tpl.setRecipientId(message.getUserId());
-            message_tpl.setMessageText("Hola amigo, ¿en qué puedo ayudarte?");
-            message_tpl.setQuickReply("text", "Consulta saldo", "consulta_saldo_click", "");
-            message_tpl.setQuickReply("text", "Transferencia", "transferencia_click", "");
-            message_tpl.setQuickReply("text", "Agregar tarjeta", "add_tarjeta_click", "");
-            message_tpl.setQuickReply("text", "Eliminar tarjeta", "delete_tarjeta_click", "");
-            platform.getBaseSender().send(message_tpl);
+        	messageTpl.setRecipientId(message.getUserId());
+        	messageTpl.setMessageText("Hola amigo, ¿en qué puedo ayudarte?");
+        	messageTpl.setQuickReply("text", "Consulta saldo", "consulta_saldo_click", "");
+        	messageTpl.setQuickReply("text", "Transferencia", "transferencia_click", "");
+        	messageTpl.setQuickReply("text", "Agregar tarjeta", "add_tarjeta_click", "");
+        	messageTpl.setQuickReply("text", "Eliminar tarjeta", "delete_tarjeta_click", "");
+            platform.getBaseSender().send(messageTpl);
 
         }
         
         if(sesion.getRegistro() == 1) 
-        	setActionForNonRegisterUsers( message_tpl );        
+        	setActionForNonRegisterUsers( messageTpl );        
         
         if( realizatransfer )
         	realizatransfer = false;
         
-        if( verificador_insersion )
-			guardaDatos( message_tpl );
+        if( verificadorInsersion )
+			guardaDatos( messageTpl );
 
-        getChoiceActions( message_tpl, action );
+        getChoiceActions( messageTpl, action );
 	}
 	
-    private void getChoiceActions(MessageTemplate message_tpl, String action) throws UnirestException, ParseException, JsonProcessingException {
+    private void getChoiceActions(MessageTemplate messageTpl, String action) throws Throwable {
     	if(!action.isEmpty()) {
-    		seleccionaTarjeta( message_tpl );
-    		if(sesion.getAccion() == null && !action.equals("") ) {
-    			if(!action.equals("") || action != "") {
-    				//sesion.setAccion(action);
-    				//setEditSesion(sesion);
-    			}
+    		seleccionaTarjeta( messageTpl );
+    		if( (sesion.getAccion() == null && !action.equals("") ) || action.equals("") ) {
+    			sesion.setAccion(action);
+    			setEditSesion(sesion);
     		}
     	}
     	
     	LOGGER.info("\n\nAcciones disponibles: " + sesion.getAccion() + "\n\n");
     	
-    	getBankActions( message_tpl );
+    	getBankActions( messageTpl );
     }
     
+    private void getTarjetaOFRegisterUser(Usuarios user) {
+    	for(int i = 0 ; i < numeroDeTarjetas; i++) {	    		
+    		String itemString = "select_banco_banamex_click_" + i;	    		
+    		if(itemString.equals(reply)) {
+    			tarjeta = user.getTarjetasList().get(i).getNtarjeta();
+    		}
+    	}
+    }
     
-    private void getBankActions(MessageTemplate message_tpl) throws UnirestException, ParseException, JsonProcessingException {    	
-    	Usuarios user = getUsuarioFromRegister( message.getUserId() );
-		
+    private void getTarjetaOFNoRegisterUser(MessageTemplate messageTpl) throws Throwable  {
+    	if( reply.equals("select_banco_banamex_click") ){
+    		messageTpl.setRecipientId(message.getUserId());
+    		messageTpl.setMessageText("Dame tu número de cuenta Banamex y tu clave de acceso separado por espacio");
+            sesion.setRegistro( (short ) 1);
+            setEditSesion(sesion);
+            
+            platform.getBaseSender().send(messageTpl);	            
+
+        }else if( reply.equals("select_banco_bancomer_click") ){
+        	messageTpl.setRecipientId(message.getUserId());
+        	messageTpl.setMessageText("Dame tu número de cuenta Bancomer");
+            sesion.setRegistro( (short ) 1);
+            setEditSesion(sesion);
+            
+            platform.getBaseSender().send(messageTpl);
+
+        }	
+    }
+    
+    private void getBankActions(MessageTemplate messageTpl) throws Throwable {    	
+    	Usuarios user = getUsuarioFromRegister( message.getUserId() );		
 		if(user != null && user.getTarjetasList() != null) {
-			
-	    	for(int i = 0 ; i < numero_de_tarjetas; i++) {	    		
-	    		String itemString = "select_banco_banamex_click_"+i;	    		
-	    		if(itemString.equals(reply)) {
-	    			tarjeta = user.getTarjetasList().get(i).getNtarjeta();
-	    			
-	    			if(sesion.getAccion() == "consulta") {
-	    				//sesion.setAccion("");
-	    				//setEditSesion(sesion);
-	    			}else if(sesion.getAccion() == "transferencia") {
-	    				//sesion.setAccion("");
-	    				//setEditSesion(sesion);
-	    			}
-	    			
-	    		}
-	    	}
+			getTarjetaOFRegisterUser(user);	    	
 		}else {
-			
-			if( reply.equals("select_banco_banamex_click") ){
-	    		message_tpl.setRecipientId(message.getUserId());
-	            message_tpl.setMessageText("Dame tu número de cuenta Banamex y tu clave de acceso separado por espacio");
-	            sesion.setRegistro( (short ) 1);
-	            setEditSesion(sesion);
-	            
-	            platform.getBaseSender().send(message_tpl);	            
-
-	        }else if( reply.equals("select_banco_bancomer_click") ){
-	    		message_tpl.setRecipientId(message.getUserId());
-	            message_tpl.setMessageText("Dame tu número de cuenta Bancomer");
-	            sesion.setRegistro( (short ) 1);
-	            setEditSesion(sesion);
-	            
-	            platform.getBaseSender().send(message_tpl);
-
-	        }			
-	    	
+			getTarjetaOFNoRegisterUser(messageTpl);	    	
 		}
     	
     }
     
-    private void saveTarjeta(MessageTemplate message_tpl) throws UnirestException {
-    	message_tpl.setRecipientId(message.getUserId());
-        message_tpl.setMessageText("¡Quieres guardar esta tarjeta? " + tarjeta);
-        message_tpl.setQuickReply("text", "Si", "guarda_tarjeta_approved_click", "");
-        message_tpl.setQuickReply("text", "No", "guarda_tarjeta_denied_click", "");
-        platform.getBaseSender().send(message_tpl);
-        verificador_insersion = true;
+    private void saveTarjeta(MessageTemplate messageTpl) throws UnirestException {
+    	messageTpl.setRecipientId(message.getUserId());
+    	messageTpl.setMessageText("¡Quieres guardar esta tarjeta? " + tarjeta);
+    	messageTpl.setQuickReply("text", "Si", "guarda_tarjeta_approved_click", "");
+    	messageTpl.setQuickReply("text", "No", "guarda_tarjeta_denied_click", "");
+        platform.getBaseSender().send(messageTpl);
+        verificadorInsersion = true;
     }
     
-    private void setActionForNonRegisterUsers(MessageTemplate message_tpl) throws UnirestException, JsonProcessingException {
+    private void setActionForNonRegisterUsers(MessageTemplate messageTpl) throws UnirestException {
     	LOGGER.info("setActionForNonRegisterUsers(MessageTemplate) " 
     			+ "if("+sesion.getAccion()+" == 'consulta') " );
-		if(sesion.getAccion() == "consulta") {
+		if( sesion.getAccion().equals( "consulta" ) ) {
     		Double saldo = setRealizarConsulta();
     		
-    		message_tpl.setRecipientId(message.getUserId());
-            message_tpl.setMessageText("Tu saldo es de: " + saldo);
-            platform.getBaseSender().send(message_tpl);
+    		messageTpl.setRecipientId(message.getUserId());
+    		messageTpl.setMessageText("Tu saldo es de: " + saldo);
+            platform.getBaseSender().send(messageTpl);
 			
-            saveTarjeta( message_tpl );
-            
-            //sesion.setAccion( "" );
-            //setEditSesion(sesion);            
-		}else if(sesion.getAccion() == "transferencia") {
-			if( setRealizaTransaccion( datostransfer ) ) {
-				message_tpl.setRecipientId(message.getUserId());
-	            message_tpl.setMessageText("La transferencia se realizó correctamente");
-	            platform.getBaseSender().send(message_tpl);
+            saveTarjeta( messageTpl );
+                     
+		}else if(sesion.getAccion().equals( "transferencia" ) && setRealizaTransaccion( datostransfer ) ) {
+			messageTpl.setRecipientId(message.getUserId());
+			messageTpl.setMessageText("La transferencia se realizó correctamente");
+	        platform.getBaseSender().send(messageTpl);
 	            
-	            saveTarjeta( message_tpl );
-			}
-			//sesion.setAccion( "" );
-			//setEditSesion(sesion);
+	        saveTarjeta( messageTpl );
 		}
 	}
 
@@ -233,70 +209,67 @@ public class AdminMensajes extends AccionesMensajes{
      * será insertado y luego se le asigna la tarjeta a guardar, el método {@code getUsuarioFromRegister(String)}
      * obtiene el usuario de la base de datos y el método {@code insertaTarjeta(String, Usuarios, String)}
      * y por último, si el usuario no existe se crea con el método {@code insertaUser(Usuario)}</p>
-     * @param message_tpl {Type: MessageTemplate}
+     * @param messageTpl {Type: MessageTemplate}
      * @see MessageTemplate
      * @throws UnirestException
      * @throws ParseException
      * */
-    private void guardaDatos(MessageTemplate message_tpl) throws UnirestException, ParseException {
+    private void guardaDatos(MessageTemplate messageTpl) throws Throwable {
     	if( reply.equals("guarda_tarjeta_approved_click") ){
     		Usuarios user = getUsuarioFromRegister( message.getUserId() );
     		
-    		if(user.getIduser() != "") {    			
+    		if(!user.getIduser().equals("") ) {    			
     			boolean insercion = insertaTarjeta( message, user, tarjeta );
-	    		message_tpl.setRecipientId(message.getUserId());
-	            message_tpl.setMessageText( insercion ? 
+	    		messageTpl.setRecipientId(message.getUserId());
+	            messageTpl.setMessageText( insercion ? 
 	            		"Listo, tu tarjeta fue guardada para proximas transacciones o consultas." : 
 	            			"Ups! no pudimos agregar tus datos :'(");
-	            platform.getBaseSender().send(message_tpl);
-	            verificador_insersion = false;	            
+	            platform.getBaseSender().send(messageTpl);
+	            verificadorInsersion = false;	            
     		}else {
     			Usuarios usuario = insertaUser(getUsuario(message));
     			if(!usuario.getIduser().isEmpty()) {    				
     				boolean insercion = insertaTarjeta( message, user, tarjeta );
-    	    		message_tpl.setRecipientId(message.getUserId());
-    	            message_tpl.setMessageText( insercion ? 
+    	    		messageTpl.setRecipientId(message.getUserId());
+    	            messageTpl.setMessageText( insercion ? 
     	            		"Listo, tu tarjeta fue guardada para proximas transacciones o consultas." : 
     	            			"Ups! no pudimos agregar tus datos :'(");
-    	            platform.getBaseSender().send(message_tpl);
-    	            verificador_insersion = false;
+    	            platform.getBaseSender().send(messageTpl);
+    	            verificadorInsersion = false;
     			}
     		}
 
-        }else if( reply.equals("guarda_tarjeta_denied_click") ){
-        	
-    		message_tpl.setRecipientId(message.getUserId());
-            message_tpl.setMessageText("Tu tarjeta no fue guardada");
-            platform.getBaseSender().send(message_tpl);
-            verificador_insersion = false;
-
+        }else if( reply.equals("guarda_tarjeta_denied_click") ){        	
+    		messageTpl.setRecipientId(message.getUserId());
+            messageTpl.setMessageText("Tu tarjeta no fue guardada");
+            platform.getBaseSender().send(messageTpl);
+            verificadorInsersion = false;
         }
     }
     
-    private void seleccionaTarjeta(MessageTemplate message_tpl) throws JSONException, UnirestException, ParseException {
+    private void seleccionaTarjeta(MessageTemplate messageTpl) throws Throwable {
     	Usuarios user = getUsuarioFromRegister( message.getUserId() );
 		
 		if(user != null && user.getTarjetasList() != null) {		
-			message_tpl.setRecipientId(message.getUserId());
-            message_tpl.setMessageText("Selecciona una tarjeta");
+			messageTpl.setRecipientId(message.getUserId());
+            messageTpl.setMessageText("Selecciona una tarjeta");
             
-            i = 0;
-            numero_de_tarjetas = user.getTarjetasList().size();
+            numeroDeTarjetas = user.getTarjetasList().size();
             
-			user.getTarjetasList().forEach( (tarjetas) -> {
-				message_tpl.setQuickReply("text",
+			user.getTarjetasList().forEach( tarjetas -> {
+				messageTpl.setQuickReply("text",
 						tarjetas.getNtarjeta() ,
-						"select_banco_banamex_click_" + i,"");
-				i++;
+						"select_banco_banamex_click_" + identificador ,"");
+				identificador++;
 			});
 			
-            platform.getBaseSender().send(message_tpl);
+            platform.getBaseSender().send(messageTpl);
 		}else {
-    		message_tpl.setRecipientId(message.getUserId());
-            message_tpl.setMessageText("No te tengo en registro, ¿Cuál es tu banco?");
-            message_tpl.setQuickReply("text", "Banamex", "select_banco_banamex_click", "");
-            message_tpl.setQuickReply("text", "Bancomer", "select_banco_bancomer_click", "");
-            platform.getBaseSender().send(message_tpl);
+    		messageTpl.setRecipientId(message.getUserId());
+            messageTpl.setMessageText("No te tengo en registro, ¿Cuál es tu banco?");
+            messageTpl.setQuickReply("text", "Banamex", "select_banco_banamex_click", "");
+            messageTpl.setQuickReply("text", "Bancomer", "select_banco_bancomer_click", "");
+            platform.getBaseSender().send(messageTpl);
         }
     }
 }

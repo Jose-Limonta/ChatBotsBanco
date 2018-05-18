@@ -36,7 +36,9 @@ public class TransaccionesServiceImp implements TransaccionesService{
 	@Override
 	public void deleteTransaccione(Integer id) {
 		Optional<Transacciones> transaccion = getTransaccionById(id);
-		transaccionRepository.delete(transaccion.get());
+		if(transaccion.isPresent()) {
+			transaccionRepository.delete(transaccion.get());
+		}
 		
 	}
 

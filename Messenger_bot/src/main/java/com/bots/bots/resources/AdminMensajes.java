@@ -44,9 +44,9 @@ public class AdminMensajes extends AccionesMensajes{
 		this.message = message;
 		this.platform = platform;
 		sesion = new Sesiones();
-		if( getSesionesExistentes(message.getUserId()) > 0 ) 
-			sesion = servicioSesiones.getSesionById(message.getUserId()).get();
-		else {
+		if( getSesionesExistentes(message.getUserId()) > 0 && message.getUserId() != null) {
+			sesion = getSesion(message.getUserId());
+		}else {
 			sesion.setIdSesion(message.getUserId());
 			sesion.setRegistro( ( short ) 0);
 			sesion.setFecha(new Date());

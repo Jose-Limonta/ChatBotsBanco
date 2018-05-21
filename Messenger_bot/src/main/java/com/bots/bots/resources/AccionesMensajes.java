@@ -125,6 +125,36 @@ public class AccionesMensajes extends AccionesAPI{
     	return getSesiones( clave ).size();
     }
     
+    protected Sesiones getSesion(String clave) throws UnirestException {
+    	Map<Object, Object> mapSesion = getSesiones(clave);
+    	Sesiones objsesion = new Sesiones();
+    	SimpleDateFormat sdf = new SimpleDateFormat();
+    	if(!mapSesion.isEmpty()) {
+    		mapSesion.forEach( (k, v) ->{
+    			switch( String.valueOf(k) ) {
+	    			case "accion": if( !org.json.JSONObject.NULL.equals( v ) ) objsesion.setAccion( (String) v ); break;
+	    			case "fecha": try {
+						objsesion.setFecha( sdf.parse( (String) v ) );
+					} catch (ParseException e) {
+						e.printStackTrace();
+					} break;
+	    			case "idSesion": objsesion.setIdSesion( (String) v ); break;
+	    			case "registro": if( !org.json.JSONObject.NULL.equals( v ) )  objsesion.setRegistro( stringToShort( integerToString ( (Integer) v) ) ); break;
+	    			default: break;
+    			}
+    		});
+    	}
+    	return !objsesion.getIdSesion().isEmpty() ? objsesion : new Sesiones();
+    }
+    
+    private Short stringToShort(String value) {
+    	return Short.valueOf(value);
+    }
+    
+    private String integerToString(Integer value) {
+    	return String.valueOf(value);
+    }
+    
     protected boolean setAddSesionMessageAccion(Sesiones sesion) throws Throwable {
     	Map<Object, Object> sesionRetorno = setAddSesion(sesion);
     	return sesionRetorno.containsKey("message") ? false : true;    	

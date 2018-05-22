@@ -29,7 +29,7 @@ public class Response {
 	private Map<Object,Object> getMapa(Map<Object,Object> mapa, Iterator<String> datos){
 		while ( datos.hasNext() ) {
 			String key = datos.next();
-			if(jsonObj.get(key).getClass().getTypeName() == "org.json.JSONObject") {
+			if(jsonObj.get(key).getClass().getTypeName().equals( "org.json.JSONObject" ) ) {
 				mapa.put(key, (JSONObject) jsonObj.get(key) );
 			}else
 				mapa.put(key, jsonObj.get(key) );

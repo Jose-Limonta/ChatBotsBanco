@@ -19,8 +19,7 @@ import javax.persistence.TemporalType;
 public class Transacciones implements Serializable{
     
 	private static final long serialVersionUID = 1L;
-	
-	@Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "idtransaccion")
@@ -35,9 +34,6 @@ public class Transacciones implements Serializable{
     @JoinColumn(name = "ndtarjeta", referencedColumnName = "ntarjeta")
     @ManyToOne(optional = false)
     private Tarjetas ndtarjeta;
-    @JoinColumn(name = "iduser", referencedColumnName = "iduser")
-    @ManyToOne(optional = false)
-    private Usuarios iduser;
 
     public Transacciones() {
     }
@@ -82,14 +78,6 @@ public class Transacciones implements Serializable{
 
     public void setNdtarjeta(Tarjetas ndtarjeta) {
         this.ndtarjeta = ndtarjeta;
-    }
-
-    public Usuarios getIduser() {
-        return iduser;
-    }
-
-    public void setIduser(Usuarios iduser) {
-        this.iduser = iduser;
     }
 
     @Override

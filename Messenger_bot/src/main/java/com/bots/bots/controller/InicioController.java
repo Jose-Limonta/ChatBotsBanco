@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.bots.bots.resources.AdminMensajes;
 import com.clivern.racter.BotPlatform;
@@ -22,8 +20,6 @@ import com.clivern.racter.senders.templates.*;
 @Controller
 public class InicioController {
 	private AdminMensajes adminmensajes =  new AdminMensajes();
-	
-	private static final Log LOGGER = LogFactory.getLog(InicioController.class);
 		
 	@RequestMapping(method = RequestMethod.GET, value = "/webhook")
     @ResponseBody
@@ -31,8 +27,6 @@ public class InicioController {
     		@RequestParam(value="hub.mode", defaultValue="") String hubMode, 
     		@RequestParam(value="hub.verify_token", defaultValue="") String hubVerifyToken, 
     		@RequestParam(value="hub.challenge", defaultValue="") String hubChallenge ) throws IOException {
-		LOGGER.info("Ejecución: verifyToken() => GET");
-		LOGGER.info("Muestra de parámetros => \n\nhub.mode: " + hubMode + "\n\nhub.verify_token: " + hubVerifyToken + "\n\nhub.challenge: "+ hubChallenge);
 		
         BotPlatform platform = new BotPlatform("src/main/java/resources/config.properties");
         platform.getVerifyWebhook().setHubMode(hubMode);
@@ -48,8 +42,6 @@ public class InicioController {
     @RequestMapping(method = RequestMethod.POST, value = "/webhook")
     @ResponseBody
     String webHook(@RequestBody String body) throws Throwable {
-    	LOGGER.info("Ejecución: webHook() => POST");
-    	LOGGER.info("Muestra: " + body);
     	
         BotPlatform platform = new BotPlatform("src/main/java/resources/config.properties");
         platform.getBaseReceiver().set(body).parse();
@@ -66,17 +58,14 @@ public class InicioController {
             ButtonTemplate buttonMessageTpl = platform.getBaseSender().getButtonTemplate();
             String action = "";
             
-            if(!quickReplyPayload.equals(""))
-            	LOGGER.info("getQuickReplyPayload: " + body);
-            
             switch(quickReplyPayload) {
             	case "consulta_saldo_click": action = "consulta"; break;
             	case "transferencia_click": action = "transferencia"; break;
             	default: action = "";
             }
             
-            adminmensajes.setConfiguration(quickReplyPayload, message, platform);
-            adminmensajes.messagesExecute(text, messageTpl, buttonMessageTpl, action);
+            adminmensajes.setConfiguration(quickReplyPayload, message, platform, messageTpl, buttonMessageTpl);
+            adminmensajes.messagesExecute(text, action);
 
         }
         

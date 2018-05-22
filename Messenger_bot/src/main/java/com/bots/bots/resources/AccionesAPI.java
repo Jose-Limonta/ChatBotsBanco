@@ -15,7 +15,6 @@ import org.json.JSONObject;
 
 import com.bots.bots.model.Sesiones;
 import com.bots.bots.model.Tarjetas;
-import com.bots.bots.model.Transacciones;
 import com.bots.bots.model.Usuarios;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.HttpResponse;
@@ -25,12 +24,11 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 public class AccionesAPI {
 	
 	private static final Log LOGGER = LogFactory.getLog(AccionesAPI.class);
-	
-	private static final String SERVER = "http://localhost";
-	private static final String PORT = ":8087";
+	private Map<String,String> headers = new HashMap<>();
 	
 	public AccionesAPI(){
-		// constructor vacío para instanciarlo
+		headers.put("Content-Type", "application/json");
+		headers.put("Cache-Control", "no-cache");
 	}
 	
 	public void getDatosCliente(String cliente) {
@@ -38,18 +36,17 @@ public class AccionesAPI {
 	}
 	
 	public Map<Object, Object> getSesiones(String clave) throws UnirestException {
-		return getMapFromHttpResponse("http://localhost:8087/clnsession/" + clave );
+		return getMapFromHttpResponse(Constantes.URL_SESIONES + clave );
 	}
 	
 	public Map<Object, Object> setAddSesion(Sesiones sesion) throws Exception  {
 		Unirest.clearDefaultHeaders();
 	    ObjectMapper mapper = new ObjectMapper();
 	    String bodyValue = mapper.writeValueAsString(sesion);
-		HttpResponse<String> response = Unirest.post("http://localhost:8087/sesioneses")
-				  .header(Constantes.CONTENT_TYPE, Constantes.APPLICATION_JSON_VALUE)
-				  .header(Constantes.CACHE_CONTROL, Constantes.CACHE_CONTROL_NO_CACHE)
-				  .body(bodyValue)
-				  .asString();
+		HttpResponse<String> response = Unirest.post(Constantes.URL_SESIONES)
+				.headers(headers)
+				.body(bodyValue)
+				.asString();
 
       if (!response.getBody().isEmpty()) {
           Response classResponse = new Response(response.getBody());
@@ -62,11 +59,11 @@ public class AccionesAPI {
 	public Map<Object, Object> setEditSesion(Sesiones sesion) throws Throwable {
 		Unirest.clearDefaultHeaders();
 	    ObjectMapper mapper = new ObjectMapper();
-		HttpResponse<String> response = Unirest.put("http://localhost:8087/sesioneses/" + sesion.getIdSesion())
-					  .header(Constantes.CONTENT_TYPE, Constantes.APPLICATION_JSON_VALUE)
-					  .header(Constantes.CACHE_CONTROL, Constantes.CACHE_CONTROL_NO_CACHE)
-					  .body(mapper.writeValueAsString(sesion))
-					  .asString();
+		HttpResponse<String> response = Unirest.put(Constantes.URL_SESIONES + sesion.getIdSesion())
+				.headers(headers)
+				.body(mapper.writeValueAsString(sesion))
+				.asString();
+		
 		if (response.getBody() == null) { return new HashMap<>(); }
         if (!response.getBody().isEmpty()) {
             Response classResponse = new Response(response.getBody());
@@ -78,10 +75,11 @@ public class AccionesAPI {
 	
 	public Map<Object,Object> setTarjeta(Tarjetas tarjeta) throws UnirestException {
 		LOGGER.info("Método en ejecución: setNuevaTarjeta(Tarjetas)");
-		if(tarjeta != null && !tarjeta.getNtarjeta().isEmpty() ) {
-			HttpResponse<String> response = Unirest.post("http://localhost:8087/tarjetases")
-					.header(Constantes.CONTENT_TYPE, Constantes.APPLICATION_JSON_VALUE)
-					.header(Constantes.CACHE_CONTROL, Constantes.CACHE_CONTROL_NO_CACHE).body(tarjeta).asString();
+		if( tarjeta.getNtarjeta() != null && !tarjeta.getNtarjeta().isEmpty() ) {
+			HttpResponse<String> response = Unirest.post( Constantes.URL_TARJETAS )
+					.headers(headers)
+					.body(tarjeta)
+					.asString();
 
 			LOGGER.info("Datos de tarjeta en salida: " + response.getBody());
 			if (!response.getBody().isEmpty()) {
@@ -94,21 +92,15 @@ public class AccionesAPI {
 		return new HashMap<>();
 	}
 	
-	/**
-	 * Funcionando
-	 * @throws UnirestException 
-	 * */
 	public Map<Object,Object> setUsuarios(Usuarios user) throws UnirestException  {
 		
 		LOGGER.info("Método en ejecución: setSaveCliente(Usuarios)");
 		
-		if(!user.getIduser().isEmpty()) {
-			HttpResponse<String> response = Unirest.post(
-					SERVER + PORT + "/usuarioses" )
-					  .header(Constantes.CONTENT_TYPE, Constantes.APPLICATION_JSON_VALUE)
-					  .header(Constantes.CACHE_CONTROL, Constantes.CACHE_CONTROL_NO_CACHE)
-					  .body( getJSONObjectOfClass(user) )
-					  .asString();
+		if(user.getIduser() != null && !user.getIduser().isEmpty()) {
+			HttpResponse<String> response = Unirest.post( Constantes.URL_USUARIOS )
+					.headers(headers)
+					.body( getJSONObjectOfClass(user) )
+					.asString();
 			LOGGER.info("Datos de usuario en salida: "+response.getBody());
 			if(!response.getBody().isEmpty()) {
 				Response classResponse = new Response( response.getBody() );		
@@ -122,14 +114,13 @@ public class AccionesAPI {
 		return true;
 	}
 	
-	public Map<Object,Object> getClienteByClave(String claveIdUser) throws UnirestException  {
-		
+	public Map<Object,Object> getClienteByClave(String claveIdUser) throws UnirestException  {		
 		LOGGER.info("Método en ejecución: getClienteByClave(String)");
 		
 		if(!claveIdUser.isEmpty()) {
-			HttpResponse<String> response = Unirest.get(SERVER + PORT + "/usuarioses/"+claveIdUser)
-					  .header(Constantes.CACHE_CONTROL, Constantes.CACHE_CONTROL_NO_CACHE)
-					  .asString();
+			HttpResponse<String> response = Unirest.get(Constantes.URL_USUARIOS + claveIdUser)
+					.headers(headers)
+					.asString();
 			if(!response.getBody().isEmpty()) {
 				LOGGER.info("Datos de clientes por clave en salida: "+response.getBody());
 				Response classResponse = new Response( response.getBody() );		
@@ -150,14 +141,16 @@ public class AccionesAPI {
             }
         }
         return object;
-    }
-	
-	
+    }	
 	
 	public Usuarios convertMapToUsuarios(Map<Object,Object> mapa, String idUser) 
 			throws Throwable {
 		if(mapa.isEmpty()) 
 			return new Usuarios();
+		
+		Map<Object,Object> mapos = getClienteByClave("7424724276277273");
+		MapToClass<Usuarios> ms = new MapToClass<>(mapos);
+		LOGGER.info("MAp to class: " + ms.getClassOfMap(new Usuarios()).toString() +" => " + mapos);
 		
 		Usuarios user = new Usuarios();
         user.setFecha(convertStringToDate(mapa.get(Constantes.GET_TO_MAP_FECHA).toString()));
@@ -165,11 +158,8 @@ public class AccionesAPI {
         user.setIduser(idUser);
         JSONObject items = (JSONObject) mapa.get(Constantes.LINKS);
         JSONObject linktarjeta = (JSONObject) items.get("tarjetasList");
-        JSONObject linktransaccion = (JSONObject) items.get("transaccionesList");
         ArrayList<Tarjetas> tarjetas = getTarjetasFromLinkJSONObject(linktarjeta.get("href").toString());
-        ArrayList<Transacciones> transaccion = getTransaccionesFromLinkJSONObject(linktransaccion.get("href").toString());
         user.setTarjetasList(tarjetas);
-        user.setTransaccionesList(transaccion);
 
         return user;
 	}
@@ -194,20 +184,6 @@ public class AccionesAPI {
         }
         return tarjetas;
     }
-
-    private ArrayList<Transacciones> getTransaccionesFromLinkJSONObject(String url) throws Throwable  {
-        ArrayList<Transacciones> transacciones = new ArrayList<>();
-        JSONArray arregloTarjetas = getArregloDeLlamadas(url, "transaccioneses");
-        for (int i = 0; i < arregloTarjetas.length(); i++) {
-            JSONObject items = (JSONObject) arregloTarjetas.get(i);
-            JSONObject urltransacciones = (JSONObject) items.get(Constantes.LINKS);
-            String urlclave = urltransacciones.getJSONObject("transacciones").get("href").toString();
-            
-            Transacciones transaccion = getTransaccionesByMap( getMapFromHttpResponse(urlclave) );
-            transacciones.add(transaccion);
-        }
-        return transacciones;
-    }
 	
 	private JSONArray getArregloDeLlamadas(String url, String tipoLlamada) throws UnirestException {
         JSONObject objEmbedded = (JSONObject) getMapFromHttpResponse(url).get("_embedded");
@@ -230,43 +206,6 @@ public class AccionesAPI {
         return tarjeta;
     }
 
-    private Transacciones getTransaccionesByMap(Map<Object, Object> mapadetransacciones) throws Throwable {
-        Transacciones transaccion = new Transacciones();
-
-        transaccion.setClavetransaccion(mapadetransacciones.get("clavetransaccion").toString());
-        transaccion.setFecha(convertStringToDate(mapadetransacciones.get(Constantes.GET_TO_MAP_FECHA).toString()));
-
-        JSONObject urltransacciones = (JSONObject) mapadetransacciones.get(Constantes.LINKS);
-        String urlclave = urltransacciones.getJSONObject("transacciones").get("href").toString();
-        int tamaniosplit = urlclave.split("/").length;
-        String id = urlclave.split("/")[tamaniosplit - 1];
-        transaccion.setIdtransaccion(Integer.parseInt(id));
-
-        Map<Object, Object> listtarjeta = getMapFromHttpResponse(urltransacciones
-        		.getJSONObject("ndtarjeta").get("href").toString());
-        Map<Object, Object> listusuario = getMapFromHttpResponse(urltransacciones
-        		.getJSONObject("iduser").get("href").toString());
-        
-        transaccion.setNdtarjeta(getTarjetaByMap(listtarjeta));
-        transaccion.setIduser(getUsuariosByMap(listusuario));
-
-        return transaccion;
-    }
-
-    private Usuarios getUsuariosByMap(Map<Object, Object> mapadeusuarios) throws ParseException {
-        Usuarios usuario = new Usuarios();
-
-        usuario.setFecha(convertStringToDate(mapadeusuarios.get(Constantes.GET_TO_MAP_FECHA).toString()));
-        usuario.setIdpagina(mapadeusuarios.get("idpagina").toString());
-
-        JSONObject urltarjetas = (JSONObject) mapadeusuarios.get(Constantes.LINKS);
-        String urlclave = urltarjetas.getJSONObject("usuarios").get("href").toString();
-
-        usuario.setIduser(urlclave.split("/")[urlclave.split("/").length - 1]);
-
-        return usuario;
-    }
-
     private Tarjetas getTarjetaByMap(Map<Object, Object> mapadetarjeta) throws ParseException {
         Tarjetas tarjeta = new Tarjetas();
 
@@ -285,9 +224,13 @@ public class AccionesAPI {
 	
 	private Map<Object, Object> getMapFromHttpResponse(String url) throws UnirestException {
         if (!url.isEmpty()) {
-            HttpResponse<String> response = Unirest.get(url).header(Constantes.CACHE_CONTROL, Constantes.CACHE_CONTROL_NO_CACHE).asString();
-
+            HttpResponse<String> response = Unirest.get(url)
+            		.headers(headers)
+            		.asString();            
+            if( response.getStatus() == 500) return new HashMap<>();
+            
             if (!response.getBody().isEmpty()) {
+            	
                 Response classResponse = new Response(response.getBody());
                 return classResponse.getMapResponse();
             }

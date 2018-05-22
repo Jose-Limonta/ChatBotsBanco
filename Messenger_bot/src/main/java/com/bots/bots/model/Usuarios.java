@@ -19,8 +19,7 @@ import javax.xml.bind.annotation.XmlTransient;
 public class Usuarios implements Serializable{
     
 	private static final long serialVersionUID = 1L;
-	
-	@Basic(optional = false)
+    @Basic(optional = false)
     @Column(name = "fecha")
     @Temporal(TemporalType.DATE)
     private Date fecha;
@@ -33,8 +32,6 @@ public class Usuarios implements Serializable{
     private String iduser;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "iduser")
     private List<Tarjetas> tarjetasList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "iduser")
-    private List<Transacciones> transaccionesList;
 
     public Usuarios() {
     }
@@ -82,15 +79,6 @@ public class Usuarios implements Serializable{
         this.tarjetasList = tarjetasList;
     }
 
-    @XmlTransient
-    public List<Transacciones> getTransaccionesList() {
-        return transaccionesList;
-    }
-
-    public void setTransaccionesList(List<Transacciones> transaccionesList) {
-        this.transaccionesList = transaccionesList;
-    }
-
     @Override
     public int hashCode() {
         int hash = 0;
@@ -107,9 +95,11 @@ public class Usuarios implements Serializable{
         return ((this.iduser == null && other.iduser != null) || (this.iduser != null && !this.iduser.equals(other.iduser)))  ? false : true;
     }
 
-    @Override
-    public String toString() {
-        return "entidades.Usuarios[ iduser=" + iduser + " ]";
-    }
+	@Override
+	public String toString() {
+		return "Usuarios [fecha=" + fecha + ", idpagina=" + idpagina + ", iduser=" + iduser + ", tarjetasList="
+				+ tarjetasList + "]";
+	}
+
     
 }

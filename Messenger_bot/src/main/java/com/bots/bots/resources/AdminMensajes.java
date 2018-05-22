@@ -31,41 +31,53 @@ public class AdminMensajes extends AccionesMensajes{
 	private String reply;
 	private MessageReceivedWebhook message;
 	private BotPlatform platform;
+	private MessageTemplate messageTpl;
+	private ButtonTemplate buttonessageTpl;
 	
 	@Autowired
-	@Qualifier("servicioSesiones")
-	private SesionesService servicioSesiones;
+	@Qualifier("serviciothis.sesiones")
+	private SesionesService serviciosesiones;
 	
 	private Sesiones sesion;
 	
 	
-	public void setConfiguration(String reply, MessageReceivedWebhook message, BotPlatform platform) throws Throwable {
+	public void setConfiguration(String reply, MessageReceivedWebhook message, 
+			BotPlatform platform, MessageTemplate messageTpl, 
+			ButtonTemplate buttonessageTpl) throws Throwable {
 		this.reply = reply;
 		this.message = message;
 		this.platform = platform;
-		sesion = new Sesiones();
-		if( getSesionesExistentes(message.getUserId()) > 0 && message.getUserId() != null) {
-			sesion = getSesion(message.getUserId());
-		}else {
-			sesion.setIdSesion(message.getUserId());
-			sesion.setRegistro( ( short ) 0);
-			sesion.setFecha(new Date());
-			setAddSesionMessageAccion(sesion);
-		}
+		this.messageTpl = messageTpl;
+		this.buttonessageTpl = buttonessageTpl;
 		
-		LOGGER.info("Ejecutando => setConfiguration('String, MessageReceivedWebhook, BotPlatform'");
+		getSessionExist();		
+		LOGGER.info("Ejecutando => setConfiguration(String, MessageReceivedWebhook, BotPlatform, MessageTemplate, ButtonTemplate)");
 	}
 	
-	private void setInitializrCredentials(String text) throws Throwable {
+	private void getSessionExist() throws Throwable {
+		this.sesion = new Sesiones();
+		this.sesion = getSesion( this.message.getUserId() );
 		
+		if( this.sesion.getIdSesion() == null ) {
+			this.sesion.setIdSesion(this.message.getUserId());
+			this.sesion.setRegistro( ( short ) 0);
+			this.sesion.setFecha(new Date());
+			setAddSesionMessageAccion(this.sesion);
+		}
+		getTarjeta(this.message,"");
+		
+		LOGGER.info("Ejecutando => getSessionExist() " + this.sesion.toString());
+	}
+	
+	private void setInitializrCredentials(String text) throws Throwable {		
 		
 		if(text.split(" ").length == 2) {
 			short accionByNonRegisterUser = 0;
 			
 			if(text.split(" ")[1].length() == 3) {
 				accionByNonRegisterUser = 1;
-				sesion.setRegistro(accionByNonRegisterUser);
-				setEditSesionMessageAccion(sesion);
+				this.sesion.setRegistro(accionByNonRegisterUser);
+				setEditSesionMessageAccion(this.sesion);
 			}
 			
 		}else if(text.split(" ").length == 3 && getValidaDatosTransferencia( text ) ) {
@@ -73,11 +85,10 @@ public class AdminMensajes extends AccionesMensajes{
 			realizatransfer = true;
 		}
 		
-		LOGGER.info("Método: setInitializrCredentials(Stirng) => Variable de sesión: " + sesion.getRegistro() );
+		LOGGER.info("Método: setInitializrCredentials(Stirng) => Variable de sesión: " + this.sesion.getRegistro() );
 	}
 	
-	public void messagesExecute(String text, MessageTemplate messageTpl, 
-			ButtonTemplate buttonMessageTpl, String action) throws Throwable {
+	public void messagesExecute(String text, String action) throws Throwable {
 		
 		setInitializrCredentials(text);
          
@@ -88,51 +99,51 @@ public class AdminMensajes extends AccionesMensajes{
         if( cuenta.length() == 16 && verifyStringToNumber(cuenta) 
         		&& text.substring(text.length() -3, text.length()).replace(" ", "").contains("ok") ){
         	tarjeta = cuenta;
-        	messageTpl.setRecipientId(message.getUserId());
-        	messageTpl.setMessageText("Escribe el número de tarjeta a transferir, el monto y tu clave de acceso, separado por espacios");
-            platform.getBaseSender().send(messageTpl);
+        	this.messageTpl.setRecipientId(this.message.getUserId());
+        	this.messageTpl.setMessageText("Escribe el número de tarjeta a transferir, el monto y tu clave de acceso, separado por espacios");
+            this.platform.getBaseSender().send(this.messageTpl);
             verificadorInsersion = true;
             
         }else if( text.toLowerCase().contains("hola") || 
         		text.toLowerCase().contains("acción") || 
         		text.toLowerCase().contains("accion") ){
 
-        	messageTpl.setRecipientId(message.getUserId());
-        	messageTpl.setMessageText("Hola amigo, ¿en qué puedo ayudarte?");
-        	messageTpl.setQuickReply("text", "Consulta saldo", "consulta_saldo_click", "");
-        	messageTpl.setQuickReply("text", "Transferencia", "transferencia_click", "");
-        	messageTpl.setQuickReply("text", "Agregar tarjeta", "add_tarjeta_click", "");
-        	messageTpl.setQuickReply("text", "Eliminar tarjeta", "delete_tarjeta_click", "");
-            platform.getBaseSender().send(messageTpl);
+        	this.messageTpl.setRecipientId(this.message.getUserId());
+        	this.messageTpl.setMessageText("Hola amigo, ¿en qué puedo ayudarte?");
+        	this.messageTpl.setQuickReply("text", "Consulta saldo", "consulta_saldo_click", "");
+        	this.messageTpl.setQuickReply("text", "Transferencia", "transferencia_click", "");
+        	this.messageTpl.setQuickReply("text", "Agregar tarjeta", "add_tarjeta_click", "");
+        	this.messageTpl.setQuickReply("text", "Eliminar tarjeta", "delete_tarjeta_click", "");
+            this.platform.getBaseSender().send(this.messageTpl);
 
         }
         
-        if(sesion.getRegistro() == 1) 
-        	setActionForNonRegisterUsers( messageTpl );        
+        if(this.sesion.getRegistro() == 1) 
+        	setActionForNonRegisterUsers();        
         
         if( realizatransfer )
         	realizatransfer = false;
         
         if( verificadorInsersion )
-			guardaDatos( messageTpl );
+			guardaDatos();
 
-        LOGGER.info("\n\nAcciones totales: " + sesion.toString() + "\n\n");
-        getChoiceActions( messageTpl, action );
+        LOGGER.info("\n\nAcciones totales: " + this.sesion.toString() + "\n\n");
+        getChoiceActions( action );
         
 	}
 	
-    private void getChoiceActions(MessageTemplate messageTpl, String action) throws Throwable {
+    private void getChoiceActions(String action) throws Throwable {
     	if(!action.isEmpty()) {
-    		seleccionaTarjeta( messageTpl );
-    		if( (sesion.getAccion() == null && !action.equals("") ) ) {
-    			sesion.setAccion(action);
-    			setEditSesionMessageAccion(sesion);
+    		seleccionaTarjeta();
+    		if( (this.sesion.getAccion() == null && !action.equals("") ) ) {
+    			this.sesion.setAccion(action);
+    			setEditSesionMessageAccion(this.sesion);
     		}
     	}
     	
-    	LOGGER.info("\n\nAcciones disponibles despues de seleccion: " + sesion.getAccion() + "\n\n");
+    	LOGGER.info("\n\nAcciones disponibles despues de seleccion: " + this.sesion.getAccion() + "\n\n");
     	
-    	getBankActions( messageTpl );
+    	getBankActions();
     }
     
     private void getTarjetaOFRegisterUser(Usuarios user) {
@@ -144,63 +155,63 @@ public class AdminMensajes extends AccionesMensajes{
     	}
     }
     
-    private void getTarjetaOFNoRegisterUser(MessageTemplate messageTpl) throws Throwable  {
+    private void getTarjetaOFNoRegisterUser() throws Throwable  {
     	if( reply.equals("select_banco_banamex_click") ){
-    		messageTpl.setRecipientId(message.getUserId());
-    		messageTpl.setMessageText("Dame tu número de cuenta Banamex y tu clave de acceso separado por espacio");
-            sesion.setRegistro( (short ) 1);
-            setEditSesionMessageAccion(sesion);
+    		this.messageTpl.setRecipientId(this.message.getUserId());
+    		this.messageTpl.setMessageText("Dame tu número de cuenta Banamex y tu clave de acceso separado por espacio");
+            this.sesion.setRegistro( (short ) 1);
+            setEditSesionMessageAccion(this.sesion);
             
-            platform.getBaseSender().send(messageTpl);	            
+            this.platform.getBaseSender().send(this.messageTpl);	            
 
         }else if( reply.equals("select_banco_bancomer_click") ){
-        	messageTpl.setRecipientId(message.getUserId());
-        	messageTpl.setMessageText("Dame tu número de cuenta Bancomer");
-            sesion.setRegistro( (short ) 1);
-            setEditSesionMessageAccion(sesion);
+        	this.messageTpl.setRecipientId(this.message.getUserId());
+        	this.messageTpl.setMessageText("Dame tu número de cuenta Bancomer");
+            this.sesion.setRegistro( (short ) 1);
+            setEditSesionMessageAccion(this.sesion);
             
-            platform.getBaseSender().send(messageTpl);
+            this.platform.getBaseSender().send(this.messageTpl);
 
         }	
     }
     
-    private void getBankActions(MessageTemplate messageTpl) throws Throwable {    	
-    	Usuarios user = getUsuarioFromRegister( message.getUserId() );		
+    private void getBankActions() throws Throwable {    	
+    	Usuarios user = getUsuarioFromRegister( this.message.getUserId() );		
 		if(user != null && user.getTarjetasList() != null) {
 			getTarjetaOFRegisterUser(user);	    	
 		}else {
-			getTarjetaOFNoRegisterUser(messageTpl);	    	
+			getTarjetaOFNoRegisterUser();	    	
 		}
     	
     }
     
-    private void saveTarjeta(MessageTemplate messageTpl) throws UnirestException {
-    	messageTpl.setRecipientId(message.getUserId());
-    	messageTpl.setMessageText("¡Quieres guardar esta tarjeta? " + tarjeta);
-    	messageTpl.setQuickReply("text", "Si", "guarda_tarjeta_approved_click", "");
-    	messageTpl.setQuickReply("text", "No", "guarda_tarjeta_denied_click", "");
-        platform.getBaseSender().send(messageTpl);
+    private void saveTarjeta() throws UnirestException {
+    	this.messageTpl.setRecipientId(this.message.getUserId());
+    	this.messageTpl.setMessageText("¡Quieres guardar esta tarjeta? " + tarjeta);
+    	this.messageTpl.setQuickReply("text", "Si", "guarda_tarjeta_approved_click", "");
+    	this.messageTpl.setQuickReply("text", "No", "guarda_tarjeta_denied_click", "");
+        this.platform.getBaseSender().send(this.messageTpl);
         verificadorInsersion = true;
     }
     
-    private void setActionForNonRegisterUsers(MessageTemplate messageTpl) throws UnirestException {
-    	LOGGER.info("setActionForNonRegisterUsers(MessageTemplate) " 
-    			+ "if("+sesion.getAccion()+" == 'consulta') " );
-		if( sesion.getAccion() != null ) {
-			if(sesion.getAccion().equals( "consulta" )) {
+    private void setActionForNonRegisterUsers() throws UnirestException {
+    	LOGGER.info("setActionForNonRegisterUsers(this.messageTemplate) " 
+    			+ "if("+this.sesion.getAccion()+" == 'consulta') " );
+		if( this.sesion.getAccion() != null ) {
+			if(this.sesion.getAccion().equals( "consulta" )) {
 	    		Double saldo = setRealizarConsulta();
 	    		
-	    		messageTpl.setRecipientId(message.getUserId());
-	    		messageTpl.setMessageText("Tu saldo es de: " + saldo);
-	            platform.getBaseSender().send(messageTpl);
+	    		this.messageTpl.setRecipientId(this.message.getUserId());
+	    		this.messageTpl.setMessageText("Tu saldo es de: " + saldo);
+	            this.platform.getBaseSender().send(this.messageTpl);
 				
-	            saveTarjeta( messageTpl );
-			} else if(sesion.getAccion().equals( "transferencia" ) && setRealizaTransaccion( datostransfer ) ) {
-				messageTpl.setRecipientId(message.getUserId());
-				messageTpl.setMessageText("La transferencia se realizó correctamente");
-		        platform.getBaseSender().send(messageTpl);
+	            saveTarjeta();
+			} else if(this.sesion.getAccion().equals( "transferencia" ) && setRealizaTransaccion( datostransfer ) ) {
+				this.messageTpl.setRecipientId(this.message.getUserId());
+				this.messageTpl.setMessageText("La transferencia se realizó correctamente");
+		        this.platform.getBaseSender().send(this.messageTpl);
 		            
-		        saveTarjeta( messageTpl );
+		        saveTarjeta();
 			}
     	}
 	}
@@ -212,67 +223,67 @@ public class AdminMensajes extends AccionesMensajes{
      * será insertado y luego se le asigna la tarjeta a guardar, el método {@code getUsuarioFromRegister(String)}
      * obtiene el usuario de la base de datos y el método {@code insertaTarjeta(String, Usuarios, String)}
      * y por último, si el usuario no existe se crea con el método {@code insertaUser(Usuario)}</p>
-     * @param messageTpl {Type: MessageTemplate}
-     * @see MessageTemplate
+     * @param this.messageTpl {Type: this.messageTemplate}
+     * @see this.messageTemplate
      * @throws UnirestException
      * @throws ParseException
      * */
-    private void guardaDatos(MessageTemplate messageTpl) throws Throwable {
+    private void guardaDatos() throws Throwable {
     	if( reply.equals("guarda_tarjeta_approved_click") ){
-    		Usuarios user = getUsuarioFromRegister( message.getUserId() );
+    		Usuarios user = getUsuarioFromRegister( this.message.getUserId() );
     		
     		if(!user.getIduser().equals("") ) {    			
-    			boolean insercion = insertaTarjeta( message, user, tarjeta );
-	    		messageTpl.setRecipientId(message.getUserId());
-	            messageTpl.setMessageText( insercion ? 
+    			boolean insercion = insertaTarjeta( this.message, user, tarjeta );
+	    		this.messageTpl.setRecipientId(this.message.getUserId());
+	            this.messageTpl.setMessageText( insercion ? 
 	            		"Listo, tu tarjeta fue guardada para proximas transacciones o consultas." : 
 	            			"Ups! no pudimos agregar tus datos :'(");
-	            platform.getBaseSender().send(messageTpl);
+	            this.platform.getBaseSender().send(this.messageTpl);
 	            verificadorInsersion = false;	            
     		}else {
-    			Usuarios usuario = insertaUser(getUsuario(message));
+    			Usuarios usuario = insertaUser(getUsuario(this.message));
     			if(!usuario.getIduser().isEmpty()) {    				
-    				boolean insercion = insertaTarjeta( message, user, tarjeta );
-    	    		messageTpl.setRecipientId(message.getUserId());
-    	            messageTpl.setMessageText( insercion ? 
+    				boolean insercion = insertaTarjeta( this.message, user, tarjeta );
+    	    		this.messageTpl.setRecipientId(this.message.getUserId());
+    	            this.messageTpl.setMessageText( insercion ? 
     	            		"Listo, tu tarjeta fue guardada para proximas transacciones o consultas." : 
     	            			"Ups! no pudimos agregar tus datos :'(");
-    	            platform.getBaseSender().send(messageTpl);
+    	            this.platform.getBaseSender().send(this.messageTpl);
     	            verificadorInsersion = false;
     			}
     		}
 
         }else if( reply.equals("guarda_tarjeta_denied_click") ){        	
-    		messageTpl.setRecipientId(message.getUserId());
-            messageTpl.setMessageText("Tu tarjeta no fue guardada");
-            platform.getBaseSender().send(messageTpl);
+    		this.messageTpl.setRecipientId(this.message.getUserId());
+            this.messageTpl.setMessageText("Tu tarjeta no fue guardada");
+            this.platform.getBaseSender().send(this.messageTpl);
             verificadorInsersion = false;
         }
     }
     
-    private void seleccionaTarjeta(MessageTemplate messageTpl) throws Throwable {
-    	Usuarios user = getUsuarioFromRegister( message.getUserId() );
+    private void seleccionaTarjeta() throws Throwable {
+    	Usuarios user = getUsuarioFromRegister( this.message.getUserId() );
 		
 		if(user != null && user.getTarjetasList() != null) {		
-			messageTpl.setRecipientId(message.getUserId());
-            messageTpl.setMessageText("Selecciona una tarjeta");
+			this.messageTpl.setRecipientId(this.message.getUserId());
+            this.messageTpl.setMessageText("Selecciona una tarjeta");
             
             numeroDeTarjetas = user.getTarjetasList().size();
             
 			user.getTarjetasList().forEach( tarjetas -> {
-				messageTpl.setQuickReply("text",
+				this.messageTpl.setQuickReply("text",
 						tarjetas.getNtarjeta() ,
 						"select_banco_banamex_click_" + identificador ,"");
 				identificador++;
 			});
 			
-            platform.getBaseSender().send(messageTpl);
+            this.platform.getBaseSender().send(this.messageTpl);
 		}else {
-    		messageTpl.setRecipientId(message.getUserId());
-            messageTpl.setMessageText("No te tengo en registro, ¿Cuál es tu banco?");
-            messageTpl.setQuickReply("text", "Banamex", "select_banco_banamex_click", "");
-            messageTpl.setQuickReply("text", "Bancomer", "select_banco_bancomer_click", "");
-            platform.getBaseSender().send(messageTpl);
+    		this.messageTpl.setRecipientId(this.message.getUserId());
+            this.messageTpl.setMessageText("No te tengo en registro, ¿Cuál es tu banco?");
+            this.messageTpl.setQuickReply("text", "Banamex", "select_banco_banamex_click", "");
+            this.messageTpl.setQuickReply("text", "Bancomer", "select_banco_bancomer_click", "");
+            this.platform.getBaseSender().send(this.messageTpl);
         }
     }
 }

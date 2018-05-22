@@ -37,7 +37,7 @@ public class AccionesMensajes extends AccionesAPI{
 		
 		if( !user.getIduser().isEmpty() ) {	    			
 			Map<Object,Object> tarjetaAgregada = setTarjeta(objtarjeta);
-			if(!tarjetaAgregada.get("fecha").equals("")) 
+			if(tarjetaAgregada.get("fecha") != null && !tarjetaAgregada.get("fecha").equals("")) 
 				return true;	    			
 		}
 		return false;
@@ -121,20 +121,15 @@ public class AccionesMensajes extends AccionesAPI{
         return new java.sql.Date(parsed.getTime());
     }
     
-    protected int getSesionesExistentes(String clave) throws UnirestException{
-    	return getSesiones( clave ).size();
-    }
-    
     protected Sesiones getSesion(String clave) throws UnirestException {
     	Map<Object, Object> mapSesion = getSesiones(clave);
     	Sesiones objsesion = new Sesiones();
-    	SimpleDateFormat sdf = new SimpleDateFormat();
-    	if(!mapSesion.isEmpty()) {
+    	if(!mapSesion.isEmpty() && !org.json.JSONObject.NULL.equals( mapSesion.get("idSesion") ) ) {
     		mapSesion.forEach( (k, v) ->{
     			switch( String.valueOf(k) ) {
 	    			case "accion": if( !org.json.JSONObject.NULL.equals( v ) ) objsesion.setAccion( (String) v ); break;
 	    			case "fecha": try {
-						objsesion.setFecha( sdf.parse( (String) v ) );
+						objsesion.setFecha( stringToDate( (String) v ) );
 					} catch (ParseException e) {
 						e.printStackTrace();
 					} break;
@@ -143,8 +138,16 @@ public class AccionesMensajes extends AccionesAPI{
 	    			default: break;
     			}
     		});
+    		return !objsesion.getIdSesion().isEmpty() ? objsesion : new Sesiones();
     	}
-    	return !objsesion.getIdSesion().isEmpty() ? objsesion : new Sesiones();
+    	
+    	return new Sesiones();
+    	
+    }
+    
+    private Date stringToDate(String targetDate) throws ParseException {
+    	SimpleDateFormat dateFormatParse = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+    	return dateFormatParse.parse(targetDate.substring(0, 19).replace("T", " ")); // "2018-05-18T22:01:01.000+0000"
     }
     
     private Short stringToShort(String value) {

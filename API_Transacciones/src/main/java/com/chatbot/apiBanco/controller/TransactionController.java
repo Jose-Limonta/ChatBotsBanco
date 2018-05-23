@@ -1,6 +1,7 @@
 package com.chatbot.apiBanco.controller;
 
 
+import com.chatbot.apiBanco.errorhandler.ErrorHandler;
 import com.chatbot.apiBanco.model.database.repository.ClienteRepository;
 import com.chatbot.apiBanco.model.database.repository.TransactionRepository;
 import com.chatbot.apiBanco.model.database.tables.TransactionLOGS;
@@ -61,22 +62,13 @@ public class TransactionController {
     @ExceptionHandler({ OpenpayServiceException.class })
     @ResponseBody
     public Error handleException(OpenpayServiceException ex) {
-        Error e = new Error();
-        e.setAdditionalProperty("Source", "Fallo de Operacion transaction");
-        e.setErrorCode(ex.getErrorCode());
-        e.setHttpCode(ex.getHttpCode());
-        e.setDescription(ex.getDescription());  
-        return e;
+        return ErrorHandler.serror(ex, "Falla de Servicio OpenPay");
     }
 
     @ExceptionHandler({ ServiceUnavailableException.class })
     @ResponseBody
     public Error handleServiceException(ServiceUnavailableException ex) {
-        Error e = new Error();
-        e.setAdditionalProperty("Source", "Servicio no disponible");
-        e.setAdditionalProperty("Cause", ex.getCause());
-        e.setDescription(ex.getMessage() );  
-        return e;
+        return ErrorHandler.serror(ex, "Servicio No disponible");
     }
 
 }

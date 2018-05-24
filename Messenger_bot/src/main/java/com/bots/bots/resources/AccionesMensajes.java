@@ -108,13 +108,16 @@ public class AccionesMensajes extends AccionesAPI{
     	return sesion != null && sesion.getIdSesion() != null ? sesion : new Sesiones();    	
     }
     
-    protected boolean setAddSesionMessageAccion(Sesiones sesion) throws UnirestException  {
-    	Map<Object, Object> sesionRetorno = setAddSesion(sesion);
-    	return sesionRetorno.containsKey("message") ? false : true;    	
+    protected Sesiones setAddSesionMessageAccion(Sesiones sesion, Map<String, Object> headers) throws UnirestException  {
+    	Map<Object, Object> sessionAdd = setAddSesion(sesion);
+    	return sessionAdd.isEmpty() ? new Sesiones() : convertMapToSesiones(sessionAdd, headers);
     }
     
     protected boolean setEditSesionMessageAccion(Sesiones sesion) throws UnirestException {
     	Map<Object, Object> sesionRetorno = setEditSesion(sesion);
+    	sesionRetorno.forEach( ( k , v ) ->{
+    		LOGGER.info("Key: " + k + " Value: " + v);
+    	});
     	return sesionRetorno.containsKey("message") ? false : true;    	
     }
 }

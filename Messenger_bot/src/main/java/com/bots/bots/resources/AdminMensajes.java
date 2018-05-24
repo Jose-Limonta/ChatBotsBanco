@@ -55,9 +55,10 @@ public class AdminMensajes extends AccionesMensajes{
 	}
 	
 	private void getSessionExist() throws UnirestException   {
+		short valorInicial = 0;
 		Map<String, Object> headers = new HashMap<>();
 		headers.put("fecha", new Date());
-		headers.put("registro", new Short(""));
+		headers.put("registro", new Short(valorInicial));
 		
 		this.sesion = new Sesiones();
 		this.sesion = getSesion( this.message.getUserId(), headers );
@@ -66,9 +67,8 @@ public class AdminMensajes extends AccionesMensajes{
 			this.sesion.setIdSesion(this.message.getUserId());
 			this.sesion.setRegistro( ( short ) 0);
 			this.sesion.setFecha(new Date());
-			setAddSesionMessageAccion(this.sesion);
+			this.sesion = setAddSesionMessageAccion(this.sesion, headers);
 		}
-		getTarjeta(this.message,"");
 		
 		LOGGER.info("Ejecutando => getSessionExist() " + this.sesion.toString());
 	}

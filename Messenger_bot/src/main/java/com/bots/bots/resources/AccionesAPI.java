@@ -68,7 +68,7 @@ public class AccionesAPI {
 		} catch (JsonProcessingException e) {
 			LOGGER.error( e.getMessage() );
 		}
-		HttpResponse<String> response = Unirest.put(Constantes.URL_SESIONES + sesion.getIdSesion())
+		HttpResponse<String> response = Unirest.put(Constantes.URL_SESIONES)
 				.headers(headers)
 				.body(bodyMapperValue)
 				.asString();

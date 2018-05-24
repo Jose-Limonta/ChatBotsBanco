@@ -1,6 +1,5 @@
 package com.bots.bots.resources;
 
-import java.text.ParseException;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -27,7 +26,7 @@ public class AccionesMensajes extends AccionesAPI{
 		return CONSULTA;
 	}
 	
-	protected boolean insertaTarjeta(MessageReceivedWebhook message, Usuarios user, String tarjeta) throws Throwable {		
+	protected boolean insertaTarjeta(MessageReceivedWebhook message, Usuarios user, String tarjeta) throws UnirestException  {		
 		LOGGER.info("Ejecucion: insertaTarjeta(MessageReceivedWebhook, Usuarios, String)");
 		
 		Tarjetas objtarjeta = getTarjeta(message, tarjeta);
@@ -40,7 +39,7 @@ public class AccionesMensajes extends AccionesAPI{
 		return false;
     }
     
-	protected Usuarios insertaUser(Usuarios usuario) throws Throwable  {
+	protected Usuarios insertaUser(Usuarios usuario) throws UnirestException  {
 		LOGGER.info("Ejecucion: insertaUser(Usuarios)");
     	Map<Object,Object> usuarioAgregado = setUsuarios(usuario);
     	return usuarioAgregado.isEmpty() ? new Usuarios() : convertMapToUsuarios(usuarioAgregado);
@@ -62,7 +61,7 @@ public class AccionesMensajes extends AccionesAPI{
 		return verificador;
     }
     
-    protected Usuarios getUsuario(MessageReceivedWebhook message) throws ParseException{
+    protected Usuarios getUsuario(MessageReceivedWebhook message){
     	LOGGER.info("Ejecucion: getUsuario(MessageReceivedWebhook)");
     	
     	Usuarios user = new Usuarios();
@@ -73,7 +72,7 @@ public class AccionesMensajes extends AccionesAPI{
 		return user;
     }
     
-    protected Tarjetas getTarjeta(MessageReceivedWebhook message, String tarjeta) throws Throwable {
+    protected Tarjetas getTarjeta(MessageReceivedWebhook message, String tarjeta) throws UnirestException  {
     	LOGGER.info("Ejecucion: getTarjeta(MessageReceivedWebhook)");
     	
     	Usuarios iduser = getUsuarioFromRegister(message.getUserId());
@@ -98,7 +97,7 @@ public class AccionesMensajes extends AccionesAPI{
     	return tipoTarjetasAv[ posision ];
     }
     
-    protected Usuarios getUsuarioFromRegister(String clave)  throws Throwable {
+    protected Usuarios getUsuarioFromRegister(String clave) throws UnirestException  {
     	LOGGER.info("Ejecucion: getUsuarioFromRegister(String)");
     	Map<Object,Object> mapausuario = getClienteByClave(clave);
     	return mapausuario.isEmpty() ? new Usuarios() : convertMapToUsuarios( mapausuario ); 
@@ -109,12 +108,12 @@ public class AccionesMensajes extends AccionesAPI{
     	return sesion != null && sesion.getIdSesion() != null ? sesion : new Sesiones();    	
     }
     
-    protected boolean setAddSesionMessageAccion(Sesiones sesion) throws Throwable {
+    protected boolean setAddSesionMessageAccion(Sesiones sesion) throws UnirestException  {
     	Map<Object, Object> sesionRetorno = setAddSesion(sesion);
     	return sesionRetorno.containsKey("message") ? false : true;    	
     }
     
-    protected boolean setEditSesionMessageAccion(Sesiones sesion) throws Throwable {
+    protected boolean setEditSesionMessageAccion(Sesiones sesion) throws UnirestException {
     	Map<Object, Object> sesionRetorno = setEditSesion(sesion);
     	return sesionRetorno.containsKey("message") ? false : true;    	
     }

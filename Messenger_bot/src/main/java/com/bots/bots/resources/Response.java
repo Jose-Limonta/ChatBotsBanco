@@ -3,6 +3,7 @@ package com.bots.bots.resources;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
@@ -55,9 +56,9 @@ public class Response {
 	 * @return {@code ArrayList<Map<Object,Object>>}
 	 * @see #setConfiguration(String)
 	 * */
-	public ArrayList<Map<Object,Object>> getMapResponseManyJSON(){
-		this.mapAll = new ArrayList<Map<Object,Object>>();
-		this.arregloindexcero.forEach( (arrayObject) ->{
+	public List<Map<Object,Object>> getMapResponseManyJSON(){
+		this.mapAll = new ArrayList<>();
+		this.arregloindexcero.forEach( arrayObject ->{
 			JSONObject itemObjetoJSON = (JSONObject) arrayObject;
 			Iterator<String> datos = itemObjetoJSON.keys();
 			setToMapArray( datos, itemObjetoJSON );
@@ -86,7 +87,6 @@ public class Response {
 	private Map<Object,Object> getMapa(Map<Object,Object> mapa, Iterator<String> datos) throws JSONException{
 		while ( datos.hasNext() ) {
 			String key = datos.next();
-			System.out.println(this.jsonObj.get(key).getClass().getTypeName());
 			if(this.jsonObj.get(key).getClass().getTypeName().equals("org.json.JSONObject")) {
 				mapa.put(key, (JSONObject) this.jsonObj.get(key) );
 			}else

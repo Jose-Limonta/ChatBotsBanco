@@ -4,10 +4,12 @@ import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
 
 /**
  * <p>Esta clase convierte un mapa a una clase, las keys del mapa deben
@@ -88,35 +90,21 @@ public class MapToClass <T>{
 		return this.classeOf;
 	}
 	
-	/**
-	 * <p>Tipo de dato al cual se especificará para guardarlo en su propiedad
-	 * esto tambien aplica en caso de que el tipo sea una Clase, en ese caso,
-	 * tomará se crearán las clases necesarias en cuanto a datos encuentre.
-	 * En caso de entontrar un arreglo de una clase más, se usará la clase 
-	 * Response para convertir todo el arreglo en un nuevo arreglo de mapas
-	 * y posteriormente convertirlo a un arreglo de clases</p>
-	 * @param Object
-	 * @param Object
-	 * @return Object
-	 * @see Response
-	 * @throws ParseException
-	 * */
 	private Object getTypeAction(Object key, Object value) throws ParseException {
 		switch( headers.get(key).getClass().getSimpleName() ) {
 			case "Date":
 				return Resources.convertStringToDate( (String) value, "yyyy-MM-dd");
 			case "Integer":
-				return (Integer) value;
+				return Integer.parseInt( value.toString());
 			case "Short":
 				return Resources.stringToShort( Resources.integerToString ( (Integer) value) );
 			default:
-				if(value.getClass().getSimpleName().equals( "JSONArray" ) ){
+				if(value instanceof JSONArray ){
 					Response classResponse = new Response();
 					classResponse.setConfiguration( value.toString() );
 					getKey(key);
-					ArrayList<Map<Object,Object>> arregloDatos = classResponse.getMapResponseManyJSON();
-					ArrayList<T> arrayClass = getClassArray( arregloDatos );
-					return arrayClass;
+					List<Map<Object,Object>> arregloDatos = classResponse.getMapResponseManyJSON();
+					return getClassArray( arregloDatos );
 				}
 				break;
 		}
@@ -153,16 +141,16 @@ public class MapToClass <T>{
 	 * @return {@code ArrayList<T> }
 	 * */
 	@SuppressWarnings("unchecked")
-	private ArrayList<T> getClassArray(ArrayList<Map<Object,Object>> mapaNewClass) {
-		LOGGER.info("getClassArray(ArrayList<Map<Object,Object>>)");
+	private ArrayList<T> getClassArray(List<Map<Object,Object>> mapaNewClass) {
+		LOGGER.info("getClassArray(List<Map<Object,Object>>)");
 		ArrayList<T> listaDeClasesGenericas = new ArrayList<>();
 		mapaNewClass.forEach( item->{
 			try {
 				T classe = (T) this.objeto.getClass().newInstance();
-				Class<?> goClass = classe.getClass();
+				Class<?> goNewClass = classe.getClass();
 				item.forEach( ( k, v )->{
 					try {
-						Field attributo = goClass.getDeclaredField( (String) k );
+						Field attributo = goNewClass.getDeclaredField( (String) k );
 						attributo.setAccessible(true);
 						if(headers.containsKey( k )) {
 							Object objType = getTypeAction(k , v);

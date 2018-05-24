@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import com.bots.bots.model.Sesiones;
 import com.bots.bots.model.Tarjetas;
 import com.bots.bots.model.Usuarios;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
@@ -36,10 +37,15 @@ public class AccionesAPI {
 		return convertMapToSesiones(mapa, headers);
 	}
 	
-	public Map<Object, Object> setAddSesion(Sesiones sesion) throws Exception  {
+	public Map<Object, Object> setAddSesion(Sesiones sesion) throws UnirestException  {
 		Unirest.clearDefaultHeaders();
 	    ObjectMapper mapper = new ObjectMapper();
-	    String bodyValue = mapper.writeValueAsString(sesion);
+	    String bodyValue = "";
+		try {
+			bodyValue = mapper.writeValueAsString(sesion);
+		} catch (JsonProcessingException e) {
+			LOGGER.error( e.getMessage() );
+		}
 		HttpResponse<String> response = Unirest.post(Constantes.URL_SESIONES)
 				.headers(headers)
 				.body(bodyValue)
@@ -53,12 +59,18 @@ public class AccionesAPI {
       return new HashMap<>();
 	}
 	
-	public Map<Object, Object> setEditSesion(Sesiones sesion) throws Throwable {
+	public Map<Object, Object> setEditSesion(Sesiones sesion) throws  UnirestException  {
 		Unirest.clearDefaultHeaders();
 	    ObjectMapper mapper = new ObjectMapper();
+	    String bodyMapperValue = "";
+		try {
+			bodyMapperValue = mapper.writeValueAsString(sesion);
+		} catch (JsonProcessingException e) {
+			LOGGER.error( e.getMessage() );
+		}
 		HttpResponse<String> response = Unirest.put(Constantes.URL_SESIONES + sesion.getIdSesion())
 				.headers(headers)
-				.body(mapper.writeValueAsString(sesion))
+				.body(bodyMapperValue)
 				.asString();
 		
 		if (response.getBody() == null) { return new HashMap<>(); }
@@ -135,14 +147,14 @@ public class AccionesAPI {
         return object;
     }	
 	
-	public Usuarios convertMapToUsuarios(Map<Object,Object> mapa)  throws Throwable {
+	public Usuarios convertMapToUsuarios(Map<Object,Object> mapa) {
 		if(mapa.isEmpty()) return new Usuarios();
 		
-		Map<String, Object> headers = new HashMap<>();
-		headers.put("fecha", new Date());
-		headers.put("tarjetasList", new Tarjetas());
+		Map<String, Object> header = new HashMap<>();
+		header.put("fecha", new Date());
+		header.put("tarjetasList", new Tarjetas());
 		
-		MapToClass<Usuarios> ms = new MapToClass<>(mapa, headers);
+		MapToClass<Usuarios> ms = new MapToClass<>(mapa, header);
 		return ms.getClassOfMap(new Usuarios());
 	}
 	
@@ -159,8 +171,8 @@ public class AccionesAPI {
             		.asString();            
             if( response.getStatus() == 500) return new HashMap<>();
             if (!response.getBody().isEmpty()) {
-            	Response class_response = new Response(response.getBody());
-                return class_response.getMapResponseOnlyOne();
+            	Response classResponse = new Response(response.getBody());
+                return classResponse.getMapResponseOnlyOne();
             }
         }
 

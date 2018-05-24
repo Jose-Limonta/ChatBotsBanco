@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.bots.bots.model.Sesiones;
-import com.bots.bots.model.Tarjetas;
 import com.bots.bots.model.Usuarios;
 import com.bots.bots.service.SesionesService;
 import com.clivern.racter.BotPlatform;
@@ -35,7 +34,6 @@ public class AdminMensajes extends AccionesMensajes{
 	private MessageReceivedWebhook message;
 	private BotPlatform platform;
 	private MessageTemplate messageTpl;
-	private ButtonTemplate buttonessageTpl;
 	
 	@Autowired
 	@Qualifier("serviciothis.sesiones")
@@ -46,21 +44,20 @@ public class AdminMensajes extends AccionesMensajes{
 	
 	public void setConfiguration(String reply, MessageReceivedWebhook message, 
 			BotPlatform platform, MessageTemplate messageTpl, 
-			ButtonTemplate buttonessageTpl) throws Throwable {
+			ButtonTemplate buttonessageTpl) throws UnirestException {
 		this.reply = reply;
 		this.message = message;
 		this.platform = platform;
 		this.messageTpl = messageTpl;
-		this.buttonessageTpl = buttonessageTpl;
 		
 		getSessionExist();		
 		LOGGER.info("Ejecutando => setConfiguration(String, MessageReceivedWebhook, BotPlatform, MessageTemplate, ButtonTemplate)");
 	}
 	
-	private void getSessionExist() throws Throwable {
+	private void getSessionExist() throws UnirestException   {
 		Map<String, Object> headers = new HashMap<>();
 		headers.put("fecha", new Date());
-		headers.put("registro", new Short( (short) 0 ));
+		headers.put("registro", new Short(""));
 		
 		this.sesion = new Sesiones();
 		this.sesion = getSesion( this.message.getUserId(), headers );
@@ -76,7 +73,7 @@ public class AdminMensajes extends AccionesMensajes{
 		LOGGER.info("Ejecutando => getSessionExist() " + this.sesion.toString());
 	}
 	
-	private void setInitializrCredentials(String text) throws Throwable {		
+	private void setInitializrCredentials(String text) throws UnirestException {		
 		
 		if(text.split(" ").length == 2) {
 			short accionByNonRegisterUser = 0;
@@ -95,7 +92,7 @@ public class AdminMensajes extends AccionesMensajes{
 		LOGGER.info("Método: setInitializrCredentials(Stirng) => Variable de sesión: " + this.sesion.getRegistro() );
 	}
 	
-	public void messagesExecute(String text, String action) throws Throwable {
+	public void messagesExecute(String text, String action) throws UnirestException{
 		
 		setInitializrCredentials(text);
          
@@ -139,7 +136,7 @@ public class AdminMensajes extends AccionesMensajes{
         
 	}
 	
-    private void getChoiceActions(String action) throws Throwable {
+    private void getChoiceActions(String action) throws UnirestException  {
     	if(!action.isEmpty()) {
     		seleccionaTarjeta();
     		if( (this.sesion.getAccion() == null && !action.equals("") ) ) {
@@ -162,7 +159,7 @@ public class AdminMensajes extends AccionesMensajes{
     	}
     }
     
-    private void getTarjetaOFNoRegisterUser() throws Throwable  {
+    private void getTarjetaOFNoRegisterUser() throws UnirestException   {
     	if( reply.equals("select_banco_banamex_click") ){
     		this.messageTpl.setRecipientId(this.message.getUserId());
     		this.messageTpl.setMessageText("Dame tu número de cuenta Banamex y tu clave de acceso separado por espacio");
@@ -182,7 +179,7 @@ public class AdminMensajes extends AccionesMensajes{
         }	
     }
     
-    private void getBankActions() throws Throwable {    	
+    private void getBankActions() throws UnirestException  {    	
     	Usuarios user = getUsuarioFromRegister( this.message.getUserId() );		
 		if(user != null && user.getTarjetasList() != null) {
 			getTarjetaOFRegisterUser(user);	    	
@@ -231,11 +228,12 @@ public class AdminMensajes extends AccionesMensajes{
      * obtiene el usuario de la base de datos y el método {@code insertaTarjeta(String, Usuarios, String)}
      * y por último, si el usuario no existe se crea con el método {@code insertaUser(Usuario)}</p>
      * @param this.messageTpl {Type: this.messageTemplate}
+     * @throws Throwable 
      * @see this.messageTemplate
      * @throws UnirestException
      * @throws ParseException
      * */
-    private void guardaDatos() throws Throwable {
+    private void guardaDatos() throws UnirestException {
     	if( reply.equals("guarda_tarjeta_approved_click") ){
     		Usuarios user = getUsuarioFromRegister( this.message.getUserId() );
     		
@@ -268,7 +266,7 @@ public class AdminMensajes extends AccionesMensajes{
         }
     }
     
-    private void seleccionaTarjeta() throws Throwable {
+    private void seleccionaTarjeta() throws UnirestException{
     	Usuarios user = getUsuarioFromRegister( this.message.getUserId() );
 		
 		if(user != null && user.getTarjetasList() != null) {		

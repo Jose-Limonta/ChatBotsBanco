@@ -42,13 +42,13 @@ public class SessionController {
 	@PostMapping(produces="application/json" )	
 	public ResponseEntity<Sesiones> setAuthor(@RequestBody Sesiones sesion) {
 		Sesiones sesionNueva = servicioSesiones.saveSesion(sesion);
-		return new ResponseEntity<Sesiones>(sesionNueva, HttpStatus.OK);
+		return new ResponseEntity<>(sesionNueva, HttpStatus.OK);
 	}
 	
 	@PutMapping(produces="application/json" )	
 	public ResponseEntity<Sesiones> setEditAuthor(@RequestBody Sesiones sesion) {
 		Sesiones sesionNueva = servicioSesiones.saveSesion(sesion);
-		return new ResponseEntity<Sesiones>(sesionNueva, HttpStatus.OK);
+		return new ResponseEntity<>(sesionNueva, HttpStatus.OK);
 	}
 
 }

@@ -99,9 +99,10 @@ public class Transacciones implements Serializable{
         return ((this.idtransaccion == null && other.idtransaccion != null) || (this.idtransaccion != null && !this.idtransaccion.equals(other.idtransaccion)))  ? false : true;
     }
 
-    @Override
-    public String toString() {
-        return "entidades.Transacciones[ idtransaccion=" + idtransaccion + " ]";
-    }
+	@Override
+	public String toString() {
+		return "Transacciones [idtransaccion=" + idtransaccion + ", clavetransaccion=" + clavetransaccion + ", fecha="
+				+ fecha + ", ndtarjeta=" + ndtarjeta + "]";
+	}
     
 }

@@ -1,0 +1,2 @@
+2018-05-24 09:00:04 [http-nio-8087-exec-3] com.clivern.racter.receivers.VerifyWebhook.challenge()
+INFO: Verify token validated successfully.

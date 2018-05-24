@@ -2,14 +2,42 @@ package com.bots.bots.resources;
 
 import java.lang.reflect.Field;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/**
+ * <p>Esta clase convierte un mapa a una clase, las keys del mapa deben
+ * ser las mismas que la propiedad de una clase, de otra manera las tomará
+ * como NULL.</p>
+ * <p>Para usar la clase deben de agregarse (o no) cabeceras, esto es que
+ * los datos al traerlos del response, son todos cadenas o arreglos de
+ * objetos, de esta manera se distinguiran al momento de agregarlos en 
+ * una propiedad, pues con las cabeceras se pueden especificar qué tipo
+ * de valor es una propiedad.<br>Para agregar una cabecera, se crea un mapa:</p>
+ * <code>
+ * {@code Map<String, Object> headers = new HashMap<>();}<br>
+ * {@code headers.put("date", new Date()); }<br>
+ * {@code headers.put("classList", new Tarjetas());}
+ * </code>
+ * <p>Cuando se encuentre un arreglo que coincida con esa cabecera, se creará un
+ * objeto del mismo tiempo para agregarselo.</p>
+ * <p>Para usar la clase, especificamos que clase será la que tomará, y en el
+ * constructor se agrega el mapa a convertir, en caso de que no se agreguen las
+ * cabeceras, se usa el constructor que no contenga el header, esto creará un
+ * mapa vacío (para evitar NULL)<br>
+ * Seguidamente se llama al metodo {@link #getClassOfMap(Object)} 
+ * especificandole el tipo de retorno.</p>
+ * <code>
+ * {@code MapToClass<Usuarios> ms = new MapToClass<>(mapos, headers); }<br>
+ * {@code ms.getClassOfMap(new Usuarios()); }
+ * </code>
+ * @author Alfonso Vásquez
+ * @version 1.0
+ * */
 public class MapToClass <T>{
 	
 	private static final Log LOGGER = LogFactory.getLog(MapToClass.class);
@@ -25,44 +53,74 @@ public class MapToClass <T>{
 		this.headers = headers;
 	}
 	
+	public MapToClass(Map<Object,Object> mapa) {
+		this.mapa = mapa;
+		this.headers = new HashMap<>();
+	}
+	
+	/**
+	 * <p>Este metodo retorna el objeto al cual se está especificando 
+	 * con el mapa previamente configurado y con las cabeceras agregadas.
+	 * Cada vez que encuentre un header buscará una accion especifica para
+	 * agregarla como valor ( {@link #getTypeAction(Object, Object)}), 
+	 * en cambio si no hay una cabecera, agregará el valor al 
+	 * campo por defecto {@link #setValueToField(String, Object)}.</p>
+	 * @param T Tipo de clase
+	 * @return T
+	 * @exception Exception
+	 * */	
 	public T getClassOfMap(T classe){
+		LOGGER.info("getClassOfMap(T)");
 		this.classeOf = classe;
 		this.goClass = this.classeOf.getClass();
 		
 		this.mapa.forEach( ( k, v )->{
 			try {
-				//headers.put("fecha", Date.class);
-				if(headers.containsKey( k )) {
-					if( headers.get(k).getClass().getSimpleName().equals("Date") ) {
-						Date fecha = convertStringToDate( (String) v);
-						setValueToField( ( String ) k, fecha);
-					}else {
-						if(v.getClass().getSimpleName().equals( "JSONArray" ) ){
-							Response classResponse = new Response();
-							LOGGER.info("Arreglo en String: " +v);
-							classResponse.setConfiguration( (String) v );
-							getKey(k);
-							ArrayList<Map<Object,Object>> arregloDatos = classResponse.getMapResponseManyJSON();
-							arregloDatos.forEach( item ->{
-								item.forEach( ( key, value ) ->{
-									LOGGER.info(key+ " =>" +value);
-								});
-							});
-							ArrayList<T> arrayClass = getClass(arregloDatos );
-							arrayClass.forEach( item ->{
-								LOGGER.info(item.toString());
-							});
-							setValueToField( ( String ) k, arrayClass);
-						}
-					}
+				if(headers.containsKey( k )) { 
+					Object objType = getTypeAction(k , v);
+					setValueToField( ( String ) k, objType);
 				}else 
-					setValueToField( ( String ) k, v);
-				
+					setValueToField( ( String ) k, v);				
 			}catch(Exception ex) {
 				ex.getMessage();
 			}
 		});
 		return this.classeOf;
+	}
+	
+	/**
+	 * <p>Tipo de dato al cual se especificará para guardarlo en su propiedad
+	 * esto tambien aplica en caso de que el tipo sea una Clase, en ese caso,
+	 * tomará se crearán las clases necesarias en cuanto a datos encuentre.
+	 * En caso de entontrar un arreglo de una clase más, se usará la clase 
+	 * Response para convertir todo el arreglo en un nuevo arreglo de mapas
+	 * y posteriormente convertirlo a un arreglo de clases</p>
+	 * @param Object
+	 * @param Object
+	 * @return Object
+	 * @see Response
+	 * @throws ParseException
+	 * */
+	private Object getTypeAction(Object key, Object value) throws ParseException {
+		switch( headers.get(key).getClass().getSimpleName() ) {
+			case "Date":
+				return Resources.convertStringToDate( (String) value, "yyyy-MM-dd");
+			case "Integer":
+				return (Integer) value;
+			case "Short":
+				return Resources.stringToShort( Resources.integerToString ( (Integer) value) );
+			default:
+				if(value.getClass().getSimpleName().equals( "JSONArray" ) ){
+					Response classResponse = new Response();
+					classResponse.setConfiguration( value.toString() );
+					getKey(key);
+					ArrayList<Map<Object,Object>> arregloDatos = classResponse.getMapResponseManyJSON();
+					ArrayList<T> arrayClass = getClassArray( arregloDatos );
+					return arrayClass;
+				}
+				break;
+		}
+		return new Object();
 	}
 	
 	private void getKey(Object key) {
@@ -71,6 +129,12 @@ public class MapToClass <T>{
 		});
 	}
 	
+	/**
+	 * <p>Agregar un valor a la propiedad actual de la clase actual</p>
+	 * @param String
+	 * @param Object
+	 * @see #getClassOfMap(Object)
+	 * */
 	private void setValueToField(String key, Object value) {
 		try {
 			Field attributo = this.goClass.getDeclaredField( (String) key );				
@@ -81,19 +145,30 @@ public class MapToClass <T>{
 		}
 	}
 	
+	/**
+	 * <p>Convierte un arreglo de mapas a un arreglo de Clases, 
+	 * las clases son especificadas con las cabeceras.</p>
+	 * @param {@code ArrayList<Map<Object,Object>> }
+	 * @see #getTypeAction(Object, Object)
+	 * @return {@code ArrayList<T> }
+	 * */
 	@SuppressWarnings("unchecked")
-	private ArrayList<T> getClass(ArrayList<Map<Object,Object>> mapaNewClass) {
+	private ArrayList<T> getClassArray(ArrayList<Map<Object,Object>> mapaNewClass) {
+		LOGGER.info("getClassArray(ArrayList<Map<Object,Object>>)");
 		ArrayList<T> listaDeClasesGenericas = new ArrayList<>();
 		mapaNewClass.forEach( item->{
 			try {
 				T classe = (T) this.objeto.getClass().newInstance();
 				Class<?> goClass = classe.getClass();
-				
 				item.forEach( ( k, v )->{
 					try {
-						Field attributo = goClass.getDeclaredField( (String) k );				
+						Field attributo = goClass.getDeclaredField( (String) k );
 						attributo.setAccessible(true);
-						attributo.set(classe, v);				
+						if(headers.containsKey( k )) {
+							Object objType = getTypeAction(k , v);
+							attributo.set(classe, objType);
+						} else
+							attributo.set(classe, v);
 					}catch(Exception ex) {
 						ex.getMessage();
 					}
@@ -106,12 +181,5 @@ public class MapToClass <T>{
 		});
 		
 		return listaDeClasesGenericas;
-	}
-	
-	private Date convertStringToDate(String dateString) throws ParseException {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        Date parsed = format.parse(dateString);
-        return new java.sql.Date( parsed.getTime() );
-    }	
-	
+	}	
 }

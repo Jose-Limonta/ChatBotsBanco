@@ -2,6 +2,8 @@ package com.bots.bots.resources;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.bots.bots.model.Sesiones;
+import com.bots.bots.model.Tarjetas;
 import com.bots.bots.model.Usuarios;
 import com.bots.bots.service.SesionesService;
 import com.clivern.racter.BotPlatform;
@@ -55,8 +58,12 @@ public class AdminMensajes extends AccionesMensajes{
 	}
 	
 	private void getSessionExist() throws Throwable {
+		Map<String, Object> headers = new HashMap<>();
+		headers.put("fecha", new Date());
+		headers.put("registro", new Short( (short) 0 ));
+		
 		this.sesion = new Sesiones();
-		this.sesion = getSesion( this.message.getUserId() );
+		this.sesion = getSesion( this.message.getUserId(), headers );
 		
 		if( this.sesion.getIdSesion() == null ) {
 			this.sesion.setIdSesion(this.message.getUserId());

@@ -1,16 +1,12 @@
 package com.bots.bots.resources;
 
 import java.lang.reflect.Field;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.bots.bots.model.Sesiones;
@@ -35,8 +31,9 @@ public class AccionesAPI {
 		// metodo aun por confirmar su funcionamiento
 	}
 	
-	public Map<Object, Object> getSesiones(String clave) throws UnirestException {
-		return getOnlyOneMapFromHttpResponse(Constantes.URL_SESIONES + clave );
+	public Sesiones getSesiones(String clave, Map<String, Object> headers) throws UnirestException {
+		Map<Object, Object> mapa = getOnlyOneMapFromHttpResponse(Constantes.URL_SESIONES + clave );
+		return convertMapToSesiones(mapa, headers);
 	}
 	
 	public Map<Object, Object> setAddSesion(Sesiones sesion) throws Exception  {
@@ -80,8 +77,6 @@ public class AccionesAPI {
 					.headers(headers)
 					.body(tarjeta)
 					.asString();
-
-			LOGGER.info("Datos de tarjeta en salida: " + response.getBody());
 			if (!response.getBody().isEmpty()) {
 				Response classResponse = new Response(response.getBody());
 				return classResponse.getMapResponseOnlyOne();
@@ -101,7 +96,6 @@ public class AccionesAPI {
 					.headers(headers)
 					.body( getJSONObjectOfClass(user) )
 					.asString();
-			LOGGER.info("Datos de usuario en salida: "+response.getBody());
 			if(!response.getBody().isEmpty()) {
 				Response classResponse = new Response( response.getBody() );		
 				return classResponse.getMapResponseOnlyOne();
@@ -116,13 +110,11 @@ public class AccionesAPI {
 	
 	public Map<Object,Object> getClienteByClave(String claveIdUser) throws UnirestException  {		
 		LOGGER.info("Método en ejecución: getClienteByClave(String)");
-		
 		if(!claveIdUser.isEmpty()) {
 			HttpResponse<String> response = Unirest.get(Constantes.URL_USUARIOS + claveIdUser)
 					.headers(headers)
 					.asString();
 			if(!response.getBody().isEmpty()) {
-				LOGGER.info("Datos de clientes por clave en salida: "+response.getBody());
 				Response classResponse = new Response( response.getBody() );		
 				return classResponse.getMapResponseOnlyOne();
 			}
@@ -143,89 +135,22 @@ public class AccionesAPI {
         return object;
     }	
 	
-	public Usuarios convertMapToUsuarios(Map<Object,Object> mapa, String idUser) 
-			throws Throwable {
-		if(mapa.isEmpty()) 
-			return new Usuarios();
-		
-		Map<Object,Object> mapos = getClienteByClave("7424724276277273");
+	public Usuarios convertMapToUsuarios(Map<Object,Object> mapa)  throws Throwable {
+		if(mapa.isEmpty()) return new Usuarios();
 		
 		Map<String, Object> headers = new HashMap<>();
 		headers.put("fecha", new Date());
 		headers.put("tarjetasList", new Tarjetas());
 		
-		MapToClass<Usuarios> ms = new MapToClass<>(mapos, headers);
-		LOGGER.info("MAp to class: " + ms.getClassOfMap(new Usuarios()).toString() +" => " + mapos);
-		
-		Usuarios user = new Usuarios();
-        user.setFecha(convertStringToDate(mapa.get(Constantes.GET_TO_MAP_FECHA).toString()));
-        user.setIdpagina(mapa.get("idpagina").toString());
-        user.setIduser(idUser);
-        JSONObject items = (JSONObject) mapa.get(Constantes.LINKS);
-        JSONObject linktarjeta = (JSONObject) items.get("tarjetasList");
-        ArrayList<Tarjetas> tarjetas = getTarjetasFromLinkJSONObject(linktarjeta.get("href").toString());
-        user.setTarjetasList(tarjetas);
-
-        return user;
+		MapToClass<Usuarios> ms = new MapToClass<>(mapa, headers);
+		return ms.getClassOfMap(new Usuarios());
 	}
 	
-	private Date convertStringToDate(String dateString) throws ParseException {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        Date parsed = format.parse(dateString);
-        return new java.sql.Date(parsed.getTime());
-    }	
-	
-	private ArrayList<Tarjetas> getTarjetasFromLinkJSONObject(String url) throws Throwable {
-        ArrayList<Tarjetas> tarjetas = new ArrayList<>();
-
-        JSONArray arreglotarjetas = getArregloDeLlamadas(url, "tarjetases");
-        for (int i = 0; i < arreglotarjetas.length(); i++) {
-            JSONObject items = (JSONObject) arreglotarjetas.get(i);
-            JSONObject urltarjetas = (JSONObject) items.get(Constantes.LINKS);
-            String urlclave = urltarjetas.getJSONObject(Constantes.GET_TO_MAP_TARJETAS).get("href").toString();
-            Tarjetas tarjeta = getTarjetaByMap(getOnlyOneMapFromHttpResponse(urlclave));
-
-            tarjetas.add(tarjeta);
-        }
-        return tarjetas;
-    }
-	
-	private JSONArray getArregloDeLlamadas(String url, String tipoLlamada) throws UnirestException {
-        JSONObject objEmbedded = (JSONObject) getOnlyOneMapFromHttpResponse(url).get("_embedded");
-        return (JSONArray) objEmbedded.get(tipoLlamada);
-    }
-	
-	public Tarjetas getTarjetaByNTarjeta(String ntarjeta) throws Exception { // cambiar a false
-        Map<Object, Object> mapadetarjeta = getOnlyOneMapFromHttpResponse("http://localhost:8087/tarjetases/" + ntarjeta);
-        Tarjetas tarjeta = new Tarjetas();
-
-        tarjeta.setFecha(convertStringToDate(mapadetarjeta.get(Constantes.GET_TO_MAP_FECHA).toString()));
-        tarjeta.setNbanco(mapadetarjeta.get("nbanco").toString());
-        tarjeta.setTtarjeta(mapadetarjeta.get("ttarjeta").toString());
-
-        JSONObject urltarjetas = (JSONObject) mapadetarjeta.get(Constantes.LINKS);
-        String urlclave = urltarjetas.getJSONObject(Constantes.GET_TO_MAP_TARJETAS).get("href").toString();
-
-        tarjeta.setNtarjeta(urlclave.split("/")[urlclave.split("/").length - 1]);
-
-        return tarjeta;
-    }
-
-    private Tarjetas getTarjetaByMap(Map<Object, Object> mapadetarjeta) throws ParseException {
-        Tarjetas tarjeta = new Tarjetas();
-
-        tarjeta.setFecha(convertStringToDate(mapadetarjeta.get(Constantes.GET_TO_MAP_FECHA).toString()));
-        tarjeta.setNbanco(mapadetarjeta.get("nbanco").toString());
-        tarjeta.setTtarjeta(mapadetarjeta.get("ttarjeta").toString());
-
-        JSONObject urltarjetas = (JSONObject) mapadetarjeta.get(Constantes.LINKS);
-        String urlclave = urltarjetas.getJSONObject(Constantes.GET_TO_MAP_TARJETAS).get("href").toString();
-
-        tarjeta.setNtarjeta(urlclave.split("/")[urlclave.split("/").length - 1]);
-
-        return tarjeta;
-    }
-
+	public Sesiones convertMapToSesiones(Map<Object,Object> mapa, Map<String, Object> headers) {
+		if(mapa.isEmpty()) return new Sesiones();		
+		MapToClass<Sesiones> ms = new MapToClass<>(mapa, headers);
+		return ms.getClassOfMap(new Sesiones());		
+	}
 	
 	private Map<Object, Object> getOnlyOneMapFromHttpResponse(String url) throws UnirestException {
         if (!url.isEmpty()) {

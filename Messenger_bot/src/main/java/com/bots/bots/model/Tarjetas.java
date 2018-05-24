@@ -125,10 +125,10 @@ public class Tarjetas implements Serializable{
         return ((this.ntarjeta == null && other.ntarjeta != null) || (this.ntarjeta != null && !this.ntarjeta.equals(other.ntarjeta))) ? false : true;
     }
 
-    @Override
-    public String toString() {
-        return "entidades.Tarjetas[ ntarjeta=" + ntarjeta + " ]";
-    }
-    
+	@Override
+	public String toString() {
+		return "Tarjetas [fecha=" + fecha + ", nbanco=" + nbanco + ", ntarjeta=" + ntarjeta + ", ttarjeta=" + ttarjeta
+				+ ", iduser=" + iduser + ", transaccionesList=" + transaccionesList + "]";
+	}
 }
 

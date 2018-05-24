@@ -1,9 +1,6 @@
 package com.bots.bots.resources;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -45,12 +42,8 @@ public class AccionesMensajes extends AccionesAPI{
     
 	protected Usuarios insertaUser(Usuarios usuario) throws Throwable  {
 		LOGGER.info("Ejecucion: insertaUser(Usuarios)");
-		
     	Map<Object,Object> usuarioAgregado = setUsuarios(usuario);
-    	if(usuarioAgregado.isEmpty())
-    		return new Usuarios();
-    	
-    	return convertMapToUsuarios(usuarioAgregado, usuario.getIduser());
+    	return usuarioAgregado.isEmpty() ? new Usuarios() : convertMapToUsuarios(usuarioAgregado);
     }
 	
 	protected boolean getValidaDatosTransferencia(String texto){
@@ -73,7 +66,7 @@ public class AccionesMensajes extends AccionesAPI{
     	LOGGER.info("Ejecucion: getUsuario(MessageReceivedWebhook)");
     	
     	Usuarios user = new Usuarios();
-		user.setFecha( getFechaOfStringToDateFromat() );
+		user.setFecha( Resources.getFechaOfStringToDateFromat() );
 		user.setIduser(message.getUserId());
 		user.setIdpagina(message.getPageId());
 		
@@ -88,7 +81,7 @@ public class AccionesMensajes extends AccionesAPI{
     	if(iduser != null && !tarjeta.isEmpty()) {
 	    	String ttarjeta  = getTipoTarjeta( tarjeta.substring(0, 1) );
 	    	
-		    objtarjeta.setFecha( getFechaOfStringToDateFromat() );
+		    objtarjeta.setFecha( Resources.getFechaOfStringToDateFromat() );
 		    objtarjeta.setIduser(iduser);
 		    objtarjeta.setNtarjeta(tarjeta);
 		    objtarjeta.setNbanco("Bancos");
@@ -108,54 +101,12 @@ public class AccionesMensajes extends AccionesAPI{
     protected Usuarios getUsuarioFromRegister(String clave)  throws Throwable {
     	LOGGER.info("Ejecucion: getUsuarioFromRegister(String)");
     	Map<Object,Object> mapausuario = getClienteByClave(clave);
-    	if(mapausuario.isEmpty())
-    		return new Usuarios();
-    	return convertMapToUsuarios(mapausuario, clave);
+    	return mapausuario.isEmpty() ? new Usuarios() : convertMapToUsuarios( mapausuario ); 
     }
     
-    protected Date getFechaOfStringToDateFromat() throws ParseException{
-    	LOGGER.info("Ejecucion: getFechaOfStringToDateFromat()");
-    	
-    	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.US);    	
-        Date parsed = format.parse( format.format( new Date() ) );
-        return new java.sql.Date(parsed.getTime());
-    }
-    
-    protected Sesiones getSesion(String clave) throws UnirestException {
-    	Map<Object, Object> mapSesion = getSesiones(clave);
-    	Sesiones objsesion = new Sesiones();
-    	if(!mapSesion.isEmpty() && !org.json.JSONObject.NULL.equals( mapSesion.get("idSesion") ) ) {
-    		mapSesion.forEach( (k, v) ->{
-    			switch( String.valueOf(k) ) {
-	    			case "accion": if( !org.json.JSONObject.NULL.equals( v ) ) objsesion.setAccion( (String) v ); break;
-	    			case "fecha": try {
-						objsesion.setFecha( stringToDate( (String) v ) );
-					} catch (ParseException e) {
-						e.printStackTrace();
-					} break;
-	    			case "idSesion": objsesion.setIdSesion( (String) v ); break;
-	    			case "registro": if( !org.json.JSONObject.NULL.equals( v ) )  objsesion.setRegistro( stringToShort( integerToString ( (Integer) v) ) ); break;
-	    			default: break;
-    			}
-    		});
-    		return !objsesion.getIdSesion().isEmpty() ? objsesion : new Sesiones();
-    	}
-    	
-    	return new Sesiones();
-    	
-    }
-    
-    private Date stringToDate(String targetDate) throws ParseException {
-    	SimpleDateFormat dateFormatParse = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-    	return dateFormatParse.parse(targetDate.substring(0, 19).replace("T", " ")); // "2018-05-18T22:01:01.000+0000"
-    }
-    
-    private Short stringToShort(String value) {
-    	return Short.valueOf(value);
-    }
-    
-    private String integerToString(Integer value) {
-    	return String.valueOf(value);
+    protected Sesiones getSesion(String clave, Map<String, Object> headers) throws UnirestException {
+    	Sesiones sesion = getSesiones(clave, headers);
+    	return sesion != null && sesion.getIdSesion() != null ? sesion : new Sesiones();    	
     }
     
     protected boolean setAddSesionMessageAccion(Sesiones sesion) throws Throwable {

@@ -36,7 +36,7 @@ public class AccionesAPI {
 	}
 	
 	public Map<Object, Object> getSesiones(String clave) throws UnirestException {
-		return getMapFromHttpResponse(Constantes.URL_SESIONES + clave );
+		return getOnlyOneMapFromHttpResponse(Constantes.URL_SESIONES + clave );
 	}
 	
 	public Map<Object, Object> setAddSesion(Sesiones sesion) throws Exception  {
@@ -50,7 +50,7 @@ public class AccionesAPI {
 
       if (!response.getBody().isEmpty()) {
           Response classResponse = new Response(response.getBody());
-          return classResponse.getMapResponse();
+          return classResponse.getMapResponseOnlyOne();
       }
       
       return new HashMap<>();
@@ -67,7 +67,7 @@ public class AccionesAPI {
 		if (response.getBody() == null) { return new HashMap<>(); }
         if (!response.getBody().isEmpty()) {
             Response classResponse = new Response(response.getBody());
-            return classResponse.getMapResponse();
+            return classResponse.getMapResponseOnlyOne();
         }
         
         return new HashMap<>();
@@ -84,7 +84,7 @@ public class AccionesAPI {
 			LOGGER.info("Datos de tarjeta en salida: " + response.getBody());
 			if (!response.getBody().isEmpty()) {
 				Response classResponse = new Response(response.getBody());
-				return classResponse.getMapResponse();
+				return classResponse.getMapResponseOnlyOne();
 			}
 
 		}
@@ -104,7 +104,7 @@ public class AccionesAPI {
 			LOGGER.info("Datos de usuario en salida: "+response.getBody());
 			if(!response.getBody().isEmpty()) {
 				Response classResponse = new Response( response.getBody() );		
-				return classResponse.getMapResponse();
+				return classResponse.getMapResponseOnlyOne();
 			}
 		}
 		return new HashMap<>();
@@ -124,7 +124,7 @@ public class AccionesAPI {
 			if(!response.getBody().isEmpty()) {
 				LOGGER.info("Datos de clientes por clave en salida: "+response.getBody());
 				Response classResponse = new Response( response.getBody() );		
-				return classResponse.getMapResponse();
+				return classResponse.getMapResponseOnlyOne();
 			}
 		}
 		return new HashMap<>();
@@ -149,7 +149,12 @@ public class AccionesAPI {
 			return new Usuarios();
 		
 		Map<Object,Object> mapos = getClienteByClave("7424724276277273");
-		MapToClass<Usuarios> ms = new MapToClass<>(mapos);
+		
+		Map<String, Object> headers = new HashMap<>();
+		headers.put("fecha", new Date());
+		headers.put("tarjetasList", new Tarjetas());
+		
+		MapToClass<Usuarios> ms = new MapToClass<>(mapos, headers);
 		LOGGER.info("MAp to class: " + ms.getClassOfMap(new Usuarios()).toString() +" => " + mapos);
 		
 		Usuarios user = new Usuarios();
@@ -178,7 +183,7 @@ public class AccionesAPI {
             JSONObject items = (JSONObject) arreglotarjetas.get(i);
             JSONObject urltarjetas = (JSONObject) items.get(Constantes.LINKS);
             String urlclave = urltarjetas.getJSONObject(Constantes.GET_TO_MAP_TARJETAS).get("href").toString();
-            Tarjetas tarjeta = getTarjetaByMap(getMapFromHttpResponse(urlclave));
+            Tarjetas tarjeta = getTarjetaByMap(getOnlyOneMapFromHttpResponse(urlclave));
 
             tarjetas.add(tarjeta);
         }
@@ -186,12 +191,12 @@ public class AccionesAPI {
     }
 	
 	private JSONArray getArregloDeLlamadas(String url, String tipoLlamada) throws UnirestException {
-        JSONObject objEmbedded = (JSONObject) getMapFromHttpResponse(url).get("_embedded");
+        JSONObject objEmbedded = (JSONObject) getOnlyOneMapFromHttpResponse(url).get("_embedded");
         return (JSONArray) objEmbedded.get(tipoLlamada);
     }
 	
 	public Tarjetas getTarjetaByNTarjeta(String ntarjeta) throws Exception { // cambiar a false
-        Map<Object, Object> mapadetarjeta = getMapFromHttpResponse("http://localhost:8087/tarjetases/" + ntarjeta);
+        Map<Object, Object> mapadetarjeta = getOnlyOneMapFromHttpResponse("http://localhost:8087/tarjetases/" + ntarjeta);
         Tarjetas tarjeta = new Tarjetas();
 
         tarjeta.setFecha(convertStringToDate(mapadetarjeta.get(Constantes.GET_TO_MAP_FECHA).toString()));
@@ -222,22 +227,19 @@ public class AccionesAPI {
     }
 
 	
-	private Map<Object, Object> getMapFromHttpResponse(String url) throws UnirestException {
+	private Map<Object, Object> getOnlyOneMapFromHttpResponse(String url) throws UnirestException {
         if (!url.isEmpty()) {
             HttpResponse<String> response = Unirest.get(url)
             		.headers(headers)
             		.asString();            
             if( response.getStatus() == 500) return new HashMap<>();
-            
             if (!response.getBody().isEmpty()) {
-            	
-                Response classResponse = new Response(response.getBody());
-                return classResponse.getMapResponse();
+            	Response class_response = new Response(response.getBody());
+                return class_response.getMapResponseOnlyOne();
             }
         }
 
         return new HashMap<>();
-    }
-	
+    }	
 	
 }

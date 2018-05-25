@@ -27,14 +27,12 @@ public class AccionesMensajes extends AccionesAPI{
 	}
 	
 	protected boolean insertaTarjeta(MessageReceivedWebhook message, Usuarios user, String tarjeta) throws UnirestException  {		
-		LOGGER.info("Ejecucion: insertaTarjeta(MessageReceivedWebhook, Usuarios, String)");
-		
-		Tarjetas objtarjeta = getTarjeta(message, tarjeta);
-		
-		if( !user.getIduser().isEmpty() ) {	    			
+		LOGGER.info("Ejecucion: insertaTarjeta(MessageReceivedWebhook, Usuarios, String)");		
+		Tarjetas objtarjeta = getTarjeta(message, tarjeta, user);
+		if( objtarjeta.getNtarjeta() != null ) {	    			
 			Map<Object,Object> tarjetaAgregada = setTarjeta(objtarjeta);
-			if(tarjetaAgregada.get("fecha") != null && !tarjetaAgregada.get("fecha").equals("")) 
-				return true;	    			
+			if(!tarjetaAgregada.isEmpty()) 
+				return true;
 		}
 		return false;
     }
@@ -63,32 +61,27 @@ public class AccionesMensajes extends AccionesAPI{
     
     protected Usuarios getUsuario(MessageReceivedWebhook message){
     	LOGGER.info("Ejecucion: getUsuario(MessageReceivedWebhook)");
-    	
-    	Usuarios user = new Usuarios();
-		user.setFecha( Resources.getFechaOfStringToDateFromat() );
-		user.setIduser(message.getUserId());
-		user.setIdpagina(message.getPageId());
-		
-		return user;
+    	return new Usuarios( 
+    			message.getUserId(),
+    			Resources.getFechaOfStringToDateFromat(),
+    			message.getPageId() );
     }
     
-    protected Tarjetas getTarjeta(MessageReceivedWebhook message, String tarjeta) throws UnirestException  {
-    	LOGGER.info("Ejecucion: getTarjeta(MessageReceivedWebhook)");
-    	
-    	Usuarios iduser = getUsuarioFromRegister(message.getUserId());
-    	Tarjetas objtarjeta = new Tarjetas();
+    protected Tarjetas getTarjeta(MessageReceivedWebhook message, String tarjeta, Usuarios iduser) throws UnirestException  {
+    	LOGGER.info("Ejecucion: getTarjeta(MessageReceivedWebhook, String, Usuarios)");
     	if(iduser != null && !tarjeta.isEmpty()) {
+    		Tarjetas objtarjeta = new Tarjetas();
 	    	String ttarjeta  = getTipoTarjeta( tarjeta.substring(0, 1) );
 	    	
 		    objtarjeta.setFecha( Resources.getFechaOfStringToDateFromat() );
-		    objtarjeta.setIduser(iduser);
-		    objtarjeta.setNtarjeta(tarjeta);
-		    objtarjeta.setNbanco("Bancos");
-		    objtarjeta.setTtarjeta(ttarjeta);
+		    objtarjeta.setIduser( iduser );
+		    objtarjeta.setNtarjeta( tarjeta );
+		    objtarjeta.setNbanco( "Bancos" );
+		    objtarjeta.setTtarjeta( ttarjeta );
 		    	
 		    return objtarjeta;    		
     	}
-    	return objtarjeta;
+    	return new Tarjetas();
     }
     
     protected String getTipoTarjeta(String tarjeta) {
@@ -113,12 +106,8 @@ public class AccionesMensajes extends AccionesAPI{
     	return sessionAdd.isEmpty() ? new Sesiones() : convertMapToSesiones(sessionAdd, headers);
     }
     
-    protected boolean setEditSesionMessageAccion(Sesiones sesion) throws UnirestException {
-    	Map<Object, Object> sesionRetorno = setEditSesion(sesion);
-    	sesionRetorno.forEach( ( k , v ) ->{
-    		LOGGER.info("Key: " + k + " Value: " + v);
-    	});
-    	return sesionRetorno.containsKey("message") ? false : true;    	
+    protected Sesiones setEditSesionMessageAccion(Sesiones sesion, Map<String, Object> headers) throws UnirestException {
+    	Map<Object, Object> sesionEdit = setEditSesion(sesion);
+    	return sesionEdit.isEmpty() ? new Sesiones() : convertMapToSesiones(sesionEdit, headers);
     }
 }
-

@@ -1,13 +1,11 @@
 package com.bots.bots.resources;
 
-import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
 
 import com.bots.bots.model.Sesiones;
 import com.bots.bots.model.Tarjetas;
@@ -17,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import com.mashape.unirest.request.HttpRequestWithBody;
 
 public class AccionesAPI {
 	
@@ -38,82 +37,26 @@ public class AccionesAPI {
 	}
 	
 	public Map<Object, Object> setAddSesion(Sesiones sesion) throws UnirestException  {
-		Unirest.clearDefaultHeaders();
-	    ObjectMapper mapper = new ObjectMapper();
-	    String bodyValue = "";
-		try {
-			bodyValue = mapper.writeValueAsString(sesion);
-		} catch (JsonProcessingException e) {
-			LOGGER.error( e.getMessage() );
-		}
-		HttpResponse<String> response = Unirest.post(Constantes.URL_SESIONES)
-				.headers(headers)
-				.body(bodyValue)
-				.asString();
-
-      if (!response.getBody().isEmpty()) {
-          Response classResponse = new Response(response.getBody());
-          return classResponse.getMapResponseOnlyOne();
-      }
-      
-      return new HashMap<>();
+		return setAPIAction( sesion, Constantes.URL_SESIONES, "post");
 	}
 	
 	public Map<Object, Object> setEditSesion(Sesiones sesion) throws  UnirestException  {
-		Unirest.clearDefaultHeaders();
-	    ObjectMapper mapper = new ObjectMapper();
-	    String bodyMapperValue = "";
-		try {
-			bodyMapperValue = mapper.writeValueAsString(sesion);
-		} catch (JsonProcessingException e) {
-			LOGGER.error( e.getMessage() );
-		}
-		HttpResponse<String> response = Unirest.put(Constantes.URL_SESIONES)
-				.headers(headers)
-				.body(bodyMapperValue)
-				.asString();
-		
-		if (response.getBody() == null) { return new HashMap<>(); }
-        if (!response.getBody().isEmpty()) {
-            Response classResponse = new Response(response.getBody());
-            return classResponse.getMapResponseOnlyOne();
-        }
-        
-        return new HashMap<>();
+		return setAPIAction( sesion, Constantes.URL_SESIONES, "put");
 	}
 	
 	public Map<Object,Object> setTarjeta(Tarjetas tarjeta) throws UnirestException {
-		LOGGER.info("Método en ejecución: setNuevaTarjeta(Tarjetas)");
-		if( tarjeta.getNtarjeta() != null && !tarjeta.getNtarjeta().isEmpty() ) {
-			HttpResponse<String> response = Unirest.post( Constantes.URL_TARJETAS )
-					.headers(headers)
-					.body(tarjeta)
-					.asString();
-			if (!response.getBody().isEmpty()) {
-				Response classResponse = new Response(response.getBody());
-				return classResponse.getMapResponseOnlyOne();
-			}
-
-		}
-		
-		return new HashMap<>();
+		LOGGER.info("Método en ejecución: setTarjeta(Tarjetas)");
+		return tarjeta.getNtarjeta() != null 
+				&& !tarjeta.getNtarjeta().isEmpty() ? 
+						setAPIAction( tarjeta, Constantes.URL_TARJETAS, "post") : 
+							new HashMap<>();
 	}
 	
-	public Map<Object,Object> setUsuarios(Usuarios user) throws UnirestException  {
-		
-		LOGGER.info("Método en ejecución: setSaveCliente(Usuarios)");
-		
-		if(user.getIduser() != null && !user.getIduser().isEmpty()) {
-			HttpResponse<String> response = Unirest.post( Constantes.URL_USUARIOS )
-					.headers(headers)
-					.body( getJSONObjectOfClass(user) )
-					.asString();
-			if(!response.getBody().isEmpty()) {
-				Response classResponse = new Response( response.getBody() );		
-				return classResponse.getMapResponseOnlyOne();
-			}
-		}
-		return new HashMap<>();
+	public Map<Object,Object> setUsuarios(Usuarios user) throws UnirestException  {		
+		LOGGER.info("Método en ejecución: setUsuarios(Usuarios)");
+		return user.getIduser() != null 
+				&& !user.getIduser().isEmpty() ? 
+						setAPIAction( user, Constantes.URL_USUARIOS, "post") : new HashMap<>();
 	}
 		
 	public boolean setNuevaTransaccion() {
@@ -122,30 +65,8 @@ public class AccionesAPI {
 	
 	public Map<Object,Object> getClienteByClave(String claveIdUser) throws UnirestException  {		
 		LOGGER.info("Método en ejecución: getClienteByClave(String)");
-		if(!claveIdUser.isEmpty()) {
-			HttpResponse<String> response = Unirest.get(Constantes.URL_USUARIOS + claveIdUser)
-					.headers(headers)
-					.asString();
-			if(!response.getBody().isEmpty()) {
-				Response classResponse = new Response( response.getBody() );		
-				return classResponse.getMapResponseOnlyOne();
-			}
-		}
-		return new HashMap<>();
+		return !claveIdUser.isEmpty() ? getOnlyOneMapFromHttpResponse(Constantes.URL_USUARIOS + claveIdUser) : new HashMap<>();
 	}
-	
-	private <T> JSONObject getJSONObjectOfClass(T clazz) {
-        JSONObject object = new JSONObject();
-        for (Field field : clazz.getClass().getDeclaredFields()) {
-            field.setAccessible(true);
-            try {
-                object.put(field.getName(), field.get(clazz));
-            } catch (IllegalArgumentException | IllegalAccessException e) {
-                object.put("error", e.getMessage());
-            }
-        }
-        return object;
-    }	
 	
 	public Usuarios convertMapToUsuarios(Map<Object,Object> mapa) {
 		if(mapa.isEmpty()) return new Usuarios();
@@ -170,13 +91,43 @@ public class AccionesAPI {
             		.headers(headers)
             		.asString();            
             if( response.getStatus() == 500) return new HashMap<>();
-            if (!response.getBody().isEmpty()) {
+            if (!response.getBody().isEmpty() && response.getStatus() == 200) {
             	Response classResponse = new Response(response.getBody());
                 return classResponse.getMapResponseOnlyOne();
             }
         }
 
         return new HashMap<>();
-    }	
+    }
+	
+	private Map<Object, Object> setAPIAction(Object classAction, String urlAction, String type) throws UnirestException  {
+		Unirest.clearDefaultHeaders();
+	    ObjectMapper mapper = new ObjectMapper();
+	    String bodyValue = "";
+		try {
+			bodyValue = mapper.writeValueAsString(classAction);
+		} catch (JsonProcessingException e) {
+			LOGGER.error( e.getMessage() );
+		}
+		HttpRequestWithBody request = getRequest(type, urlAction);
+		HttpResponse<String> response = request
+				.headers( headers ).body( bodyValue ).asString();
+		
+		if (response.getBody() == null) return new HashMap<>();
+		
+		if (!response.getBody().isEmpty() && response.getStatus() == 200) {
+			Response classResponse = new Response( response.getBody() );
+			return classResponse.getMapResponseOnlyOne();
+			}
+		return new HashMap<>();
+	}
+	
+	private HttpRequestWithBody getRequest(String type, String urlAction) {
+		switch( type ) {
+			case "post": return Unirest.post( urlAction );
+			case "put": return Unirest.put( urlAction );
+			default : return Unirest.delete( urlAction );
+		}
+	}
 	
 }

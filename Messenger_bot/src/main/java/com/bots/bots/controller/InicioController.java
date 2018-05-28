@@ -16,6 +16,7 @@ import com.clivern.racter.BotPlatform;
 import com.clivern.racter.receivers.webhook.*;
 
 import com.clivern.racter.senders.templates.*;
+import com.mashape.unirest.http.exceptions.UnirestException;
 
 @Controller
 public class InicioController {
@@ -41,7 +42,7 @@ public class InicioController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/webhook")
     @ResponseBody
-    String webHook(@RequestBody String body) throws Throwable {
+    String webHook(@RequestBody String body) throws IOException, UnirestException  {
     	
         BotPlatform platform = new BotPlatform("src/main/java/resources/config.properties");
         platform.getBaseReceiver().set(body).parse();

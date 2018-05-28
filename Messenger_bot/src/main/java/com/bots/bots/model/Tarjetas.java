@@ -16,6 +16,9 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlTransient;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "tarjetas", catalog = "bots", schema = "")
 public class Tarjetas implements Serializable{
@@ -37,8 +40,10 @@ public class Tarjetas implements Serializable{
     private String ttarjeta;
     @JoinColumn(name = "iduser", referencedColumnName = "iduser")
     @ManyToOne(optional = false)
+    @JsonBackReference
     private Usuarios iduser;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "ndtarjeta")
+    @JsonManagedReference
     private List<Transacciones> transaccionesList;
 
     public Tarjetas() {
@@ -120,10 +125,10 @@ public class Tarjetas implements Serializable{
         return ((this.ntarjeta == null && other.ntarjeta != null) || (this.ntarjeta != null && !this.ntarjeta.equals(other.ntarjeta))) ? false : true;
     }
 
-    @Override
-    public String toString() {
-        return "entidades.Tarjetas[ ntarjeta=" + ntarjeta + " ]";
-    }
-    
+	@Override
+	public String toString() {
+		return "Tarjetas [fecha=" + fecha + ", nbanco=" + nbanco + ", ntarjeta=" + ntarjeta + ", ttarjeta=" + ttarjeta
+				+ ", iduser=" + iduser + ", transaccionesList=" + transaccionesList + "]";
+	}
 }
 

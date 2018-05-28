@@ -4,10 +4,6 @@ public class Constantes {
 	
 	private Constantes() {}
 	
-	public static final String LINKS = "_links";
-	public static final String GET_TO_MAP_FECHA = "fecha";
-	public static final String GET_TO_MAP_TARJETAS = "tarjetas";
-	
 	public static final String URL_TARJETAS="http://localhost:8087/tempSource/tarjetas/";
 	public static final String URL_TRANSACCIONES="http://localhost:8087/tempSource/transacciones/";
 	public static final String URL_USUARIOS="http://localhost:8087/tempSource/usuarios/";

@@ -52,4 +52,29 @@ else if( text.toLowerCase().contains("noticia")
 
             for (String attachment : attachments.values()) {
                 Logger.info("Attachment#:" + attachment);
-            }*/
+            }
+            
+            /*if(user.getIduser() != null && !user.getIduser().isEmpty()) {
+			HttpResponse<String> response = Unirest.post( Constantes.URL_USUARIOS )
+					.headers(headers)
+					.body( getJSONObjectOfClass(user) )
+					.asString();
+			if(!response.getBody().isEmpty()) {
+				Response classResponse = new Response( response.getBody() );		
+				return classResponse.getMapResponseOnlyOne();
+			}
+		}
+		return new HashMap<>();*/
+	private <T> JSONObject getJSONObjectOfClass(T clazz) {
+        JSONObject object = new JSONObject();
+        for (Field field : clazz.getClass().getDeclaredFields()) {
+            field.setAccessible(true);
+            try {
+                object.put(field.getName(), field.get(clazz));
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+                object.put("error", e.getMessage());
+            }
+        }
+        return object;
+    }	
+            */

@@ -2,6 +2,8 @@ package com.bots.bots.resources;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,12 +29,12 @@ public class AdminMensajes extends AccionesMensajes{
 	private Integer identificador = 0;
 	private String[] datostransfer;
 	private boolean realizatransfer = false;
+	private Map<String, Object> headers = new HashMap<>();
 	
 	private String reply;
 	private MessageReceivedWebhook message;
 	private BotPlatform platform;
 	private MessageTemplate messageTpl;
-	private ButtonTemplate buttonessageTpl;
 	
 	@Autowired
 	@Qualifier("serviciothis.sesiones")
@@ -43,33 +45,35 @@ public class AdminMensajes extends AccionesMensajes{
 	
 	public void setConfiguration(String reply, MessageReceivedWebhook message, 
 			BotPlatform platform, MessageTemplate messageTpl, 
-			ButtonTemplate buttonessageTpl) throws Throwable {
+			ButtonTemplate buttonessageTpl) throws UnirestException {
 		this.reply = reply;
 		this.message = message;
 		this.platform = platform;
 		this.messageTpl = messageTpl;
-		this.buttonessageTpl = buttonessageTpl;
 		
 		getSessionExist();		
 		LOGGER.info("Ejecutando => setConfiguration(String, MessageReceivedWebhook, BotPlatform, MessageTemplate, ButtonTemplate)");
 	}
 	
-	private void getSessionExist() throws Throwable {
+	private void getSessionExist() throws UnirestException   {
+		short valorInicial = 0;
+		this.headers.put("fecha", new Date());
+		this.headers.put("registro", new Short(valorInicial));
+		
 		this.sesion = new Sesiones();
-		this.sesion = getSesion( this.message.getUserId() );
+		this.sesion = getSesion( this.message.getUserId(), this.headers );
 		
 		if( this.sesion.getIdSesion() == null ) {
 			this.sesion.setIdSesion(this.message.getUserId());
 			this.sesion.setRegistro( ( short ) 0);
 			this.sesion.setFecha(new Date());
-			setAddSesionMessageAccion(this.sesion);
+			this.sesion = setAddSesionMessageAccion(this.sesion, this.headers);
 		}
-		getTarjeta(this.message,"");
 		
 		LOGGER.info("Ejecutando => getSessionExist() " + this.sesion.toString());
 	}
 	
-	private void setInitializrCredentials(String text) throws Throwable {		
+	private void setInitializrCredentials(String text) throws UnirestException {		
 		
 		if(text.split(" ").length == 2) {
 			short accionByNonRegisterUser = 0;
@@ -77,7 +81,7 @@ public class AdminMensajes extends AccionesMensajes{
 			if(text.split(" ")[1].length() == 3) {
 				accionByNonRegisterUser = 1;
 				this.sesion.setRegistro(accionByNonRegisterUser);
-				setEditSesionMessageAccion(this.sesion);
+				this.sesion = setEditSesionMessageAccion(this.sesion, this.headers);
 			}
 			
 		}else if(text.split(" ").length == 3 && getValidaDatosTransferencia( text ) ) {
@@ -88,7 +92,7 @@ public class AdminMensajes extends AccionesMensajes{
 		LOGGER.info("Método: setInitializrCredentials(Stirng) => Variable de sesión: " + this.sesion.getRegistro() );
 	}
 	
-	public void messagesExecute(String text, String action) throws Throwable {
+	public void messagesExecute(String text, String action) throws UnirestException{
 		
 		setInitializrCredentials(text);
          
@@ -132,12 +136,12 @@ public class AdminMensajes extends AccionesMensajes{
         
 	}
 	
-    private void getChoiceActions(String action) throws Throwable {
+    private void getChoiceActions(String action) throws UnirestException  {
     	if(!action.isEmpty()) {
     		seleccionaTarjeta();
     		if( (this.sesion.getAccion() == null && !action.equals("") ) ) {
     			this.sesion.setAccion(action);
-    			setEditSesionMessageAccion(this.sesion);
+    			this.sesion = setEditSesionMessageAccion(this.sesion, this.headers);
     		}
     	}
     	
@@ -155,12 +159,12 @@ public class AdminMensajes extends AccionesMensajes{
     	}
     }
     
-    private void getTarjetaOFNoRegisterUser() throws Throwable  {
+    private void getTarjetaOFNoRegisterUser() throws UnirestException   {
     	if( reply.equals("select_banco_banamex_click") ){
     		this.messageTpl.setRecipientId(this.message.getUserId());
     		this.messageTpl.setMessageText("Dame tu número de cuenta Banamex y tu clave de acceso separado por espacio");
             this.sesion.setRegistro( (short ) 1);
-            setEditSesionMessageAccion(this.sesion);
+            this.sesion = setEditSesionMessageAccion(this.sesion, this.headers);
             
             this.platform.getBaseSender().send(this.messageTpl);	            
 
@@ -168,14 +172,14 @@ public class AdminMensajes extends AccionesMensajes{
         	this.messageTpl.setRecipientId(this.message.getUserId());
         	this.messageTpl.setMessageText("Dame tu número de cuenta Bancomer");
             this.sesion.setRegistro( (short ) 1);
-            setEditSesionMessageAccion(this.sesion);
+            this.sesion = setEditSesionMessageAccion(this.sesion, this.headers);
             
             this.platform.getBaseSender().send(this.messageTpl);
 
         }	
     }
     
-    private void getBankActions() throws Throwable {    	
+    private void getBankActions() throws UnirestException  {    	
     	Usuarios user = getUsuarioFromRegister( this.message.getUserId() );		
 		if(user != null && user.getTarjetasList() != null) {
 			getTarjetaOFRegisterUser(user);	    	
@@ -224,26 +228,29 @@ public class AdminMensajes extends AccionesMensajes{
      * obtiene el usuario de la base de datos y el método {@code insertaTarjeta(String, Usuarios, String)}
      * y por último, si el usuario no existe se crea con el método {@code insertaUser(Usuario)}</p>
      * @param this.messageTpl {Type: this.messageTemplate}
+     * @throws Throwable 
      * @see this.messageTemplate
      * @throws UnirestException
      * @throws ParseException
      * */
-    private void guardaDatos() throws Throwable {
+    private void guardaDatos() throws UnirestException {
     	if( reply.equals("guarda_tarjeta_approved_click") ){
     		Usuarios user = getUsuarioFromRegister( this.message.getUserId() );
     		
-    		if(!user.getIduser().equals("") ) {    			
+    		if( user.getIduser() != null ) {    			
     			boolean insercion = insertaTarjeta( this.message, user, tarjeta );
+    			setActionToZero();
 	    		this.messageTpl.setRecipientId(this.message.getUserId());
 	            this.messageTpl.setMessageText( insercion ? 
 	            		"Listo, tu tarjeta fue guardada para proximas transacciones o consultas." : 
 	            			"Ups! no pudimos agregar tus datos :'(");
 	            this.platform.getBaseSender().send(this.messageTpl);
-	            verificadorInsersion = false;	            
+	            verificadorInsersion = false;
     		}else {
     			Usuarios usuario = insertaUser(getUsuario(this.message));
-    			if(!usuario.getIduser().isEmpty()) {    				
-    				boolean insercion = insertaTarjeta( this.message, user, tarjeta );
+    			setActionToZero();
+    			if(usuario.getIduser() != null) {    				
+    				boolean insercion = insertaTarjeta( this.message, usuario, tarjeta );
     	    		this.messageTpl.setRecipientId(this.message.getUserId());
     	            this.messageTpl.setMessageText( insercion ? 
     	            		"Listo, tu tarjeta fue guardada para proximas transacciones o consultas." : 
@@ -253,7 +260,9 @@ public class AdminMensajes extends AccionesMensajes{
     			}
     		}
 
-        }else if( reply.equals("guarda_tarjeta_denied_click") ){        	
+        }else if( reply.equals("guarda_tarjeta_denied_click") ){
+        	setActionToZero();
+        	
     		this.messageTpl.setRecipientId(this.message.getUserId());
             this.messageTpl.setMessageText("Tu tarjeta no fue guardada");
             this.platform.getBaseSender().send(this.messageTpl);
@@ -261,7 +270,12 @@ public class AdminMensajes extends AccionesMensajes{
         }
     }
     
-    private void seleccionaTarjeta() throws Throwable {
+    private void setActionToZero() throws UnirestException {
+    	this.sesion.setRegistro( (short ) 0);
+        this.sesion = setEditSesionMessageAccion(this.sesion, this.headers);
+    }
+    
+    private void seleccionaTarjeta() throws UnirestException{
     	Usuarios user = getUsuarioFromRegister( this.message.getUserId() );
 		
 		if(user != null && user.getTarjetasList() != null) {		

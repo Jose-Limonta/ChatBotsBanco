@@ -7,18 +7,17 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 import com.bots.bots.model.Sesiones;
 import com.bots.bots.model.Usuarios;
-import com.bots.bots.service.SesionesService;
 import com.clivern.racter.BotPlatform;
 import com.clivern.racter.receivers.webhook.MessageReceivedWebhook;
 import com.clivern.racter.senders.templates.ButtonTemplate;
 import com.clivern.racter.senders.templates.MessageTemplate;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
+@Component("adminMensajes")
 public class AdminMensajes extends AccionesMensajes{
 	
 	private static final Log LOGGER = LogFactory.getLog(AdminMensajes.class);
@@ -34,14 +33,8 @@ public class AdminMensajes extends AccionesMensajes{
 	private String reply;
 	private MessageReceivedWebhook message;
 	private BotPlatform platform;
-	private MessageTemplate messageTpl;
-	
-	@Autowired
-	@Qualifier("serviciothis.sesiones")
-	private SesionesService serviciosesiones;
-	
-	private Sesiones sesion;
-	
+	private MessageTemplate messageTpl;	
+	private Sesiones sesion;	
 	
 	public void setConfiguration(String reply, MessageReceivedWebhook message, 
 			BotPlatform platform, MessageTemplate messageTpl, 
@@ -51,7 +44,7 @@ public class AdminMensajes extends AccionesMensajes{
 		this.platform = platform;
 		this.messageTpl = messageTpl;
 		
-		getSessionExist();		
+		getSessionExist();
 		LOGGER.info("Ejecutando => setConfiguration(String, MessageReceivedWebhook, BotPlatform, MessageTemplate, ButtonTemplate)");
 	}
 	
@@ -74,17 +67,23 @@ public class AdminMensajes extends AccionesMensajes{
 	}
 	
 	private void setInitializrCredentials(String text) throws UnirestException {		
-		
-		if(text.split(" ").length == 2) {
-			short accionByNonRegisterUser = 0;
+		String[] arrContenido = text.split(" "); 
+		if(arrContenido.length == 2) { // tarjeta [1234567890123456] 565
 			
-			if(text.split(" ")[1].length() == 3) {
-				accionByNonRegisterUser = 1;
-				this.sesion.setRegistro(accionByNonRegisterUser);
+			if(arrContenido[1].length() == 3) { // codigo de tarjeta [565]
+				this.sesion.setRegistro( (short) 1);
+				String noTarjetaEncrypt = "";
+				try {
+					noTarjetaEncrypt = Resources.getEncrypt( arrContenido[0] , this.sesion.getIdSesion() );
+				} catch (Exception e) {
+					LOGGER.error( e.getMessage() );
+				}
+				this.sesion.setNotarjeta( noTarjetaEncrypt );
 				this.sesion = setEditSesionMessageAccion(this.sesion, this.headers);
+				verificadorInsersion = true;
 			}
-			
-		}else if(text.split(" ").length == 3 && getValidaDatosTransferencia( text ) ) {
+			// 1234567890123456 324 1234567890123456 4343.34 {de cuenta - clave  - otra ceunta - monto}
+		}else if(arrContenido.length == 4 && getValidaDatosTransferencia( text ) ) {
 			datostransfer = text.split(" ");
 			realizatransfer = true;
 		}
@@ -95,38 +94,23 @@ public class AdminMensajes extends AccionesMensajes{
 	public void messagesExecute(String text, String action) throws UnirestException{
 		
 		setInitializrCredentials(text);
-         
-		String cuenta ="0";
-        if( text.length() >= 19) 
-        	cuenta = text.substring(0, text.length() -3);
-        
-        if( cuenta.length() == 16 && verifyStringToNumber(cuenta) 
-        		&& text.substring(text.length() -3, text.length()).replace(" ", "").contains("ok") ){
-        	tarjeta = cuenta;
-        	this.messageTpl.setRecipientId(this.message.getUserId());
-        	this.messageTpl.setMessageText("Escribe el número de tarjeta a transferir, el monto y tu clave de acceso, separado por espacios");
-            this.platform.getBaseSender().send(this.messageTpl);
-            verificadorInsersion = true;
-            
-        }else if( text.toLowerCase().contains("hola") || 
+		
+		if( text.toLowerCase().contains("hola") || 
         		text.toLowerCase().contains("acción") || 
         		text.toLowerCase().contains("accion") ){
 
         	this.messageTpl.setRecipientId(this.message.getUserId());
-        	this.messageTpl.setMessageText("Hola amigo, ¿en qué puedo ayudarte?");
+        	this.messageTpl.setMessageText("Hola amigo, ¿En qué puedo ayudarte?");
         	this.messageTpl.setQuickReply("text", "Consulta saldo", "consulta_saldo_click", "");
         	this.messageTpl.setQuickReply("text", "Transferencia", "transferencia_click", "");
         	this.messageTpl.setQuickReply("text", "Agregar tarjeta", "add_tarjeta_click", "");
         	this.messageTpl.setQuickReply("text", "Eliminar tarjeta", "delete_tarjeta_click", "");
-            this.platform.getBaseSender().send(this.messageTpl);
+            this.platform.getBaseSender().send( this.messageTpl );
 
         }
         
         if(this.sesion.getRegistro() == 1) 
-        	setActionForNonRegisterUsers();        
-        
-        if( realizatransfer )
-        	realizatransfer = false;
+        	setActionForNonRegisterUsers();
         
         if( verificadorInsersion )
 			guardaDatos();
@@ -199,8 +183,7 @@ public class AdminMensajes extends AccionesMensajes{
     }
     
     private void setActionForNonRegisterUsers() throws UnirestException {
-    	LOGGER.info("setActionForNonRegisterUsers(this.messageTemplate) " 
-    			+ "if("+this.sesion.getAccion()+" == 'consulta') " );
+    	LOGGER.info("setActionForNonRegisterUsers(this.messageTemplate) " );
 		if( this.sesion.getAccion() != null ) {
 			if(this.sesion.getAccion().equals( "consulta" )) {
 	    		Double saldo = setRealizarConsulta();
@@ -277,7 +260,7 @@ public class AdminMensajes extends AccionesMensajes{
     
     private void seleccionaTarjeta() throws UnirestException{
     	Usuarios user = getUsuarioFromRegister( this.message.getUserId() );
-		
+		LOGGER.info("seleccionaTarjeta() user: " + user.toString());
 		if(user != null && user.getTarjetasList() != null) {		
 			this.messageTpl.setRecipientId(this.message.getUserId());
             this.messageTpl.setMessageText("Selecciona una tarjeta");

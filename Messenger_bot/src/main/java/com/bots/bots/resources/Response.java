@@ -22,7 +22,7 @@ import org.json.JSONObject;
  * <p>Para convertir una cadena con muchos valores (arreglo de mapas) es la siguente:</p>
  * <code>{@code Response classResponse = new Response(); }<br>
  * classResponse.setConfiguration( "[{"propiedad":"valor"},{"propiedad":"valor"}]" ); <br>
- * {@code ArrayList<Map<Object,Object>> arregloDatos = classResponse.getMapResponseManyJSON();}</code>
+ * {@code List<Map<Object,Object>> arregloDatos = classResponse.getMapResponseManyJSON();}</code>
  * */
 public class Response {
 	

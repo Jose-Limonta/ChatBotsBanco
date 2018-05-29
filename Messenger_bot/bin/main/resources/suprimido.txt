@@ -77,4 +77,18 @@ else if( text.toLowerCase().contains("noticia")
         }
         return object;
     }	
+    
+    String cuenta ="0";
+        if( text.length() >= 19) 
+        	cuenta = text.substring(0, text.length() -3);
+        
+        if( cuenta.length() == 16 && Resources.verifyStringToNumber(cuenta) 
+        		&& text.substring(text.length() -3, text.length()).replace(" ", "").contains("ok") ){
+        	tarjeta = cuenta;
+        	this.messageTpl.setRecipientId(this.message.getUserId());
+        	this.messageTpl.setMessageText("Escribe el número de tarjeta a transferir, el monto y tu clave de acceso, separado por espacios");
+            this.platform.getBaseSender().send(this.messageTpl);
+            verificadorInsersion = true;
+            
+        }else 
             */

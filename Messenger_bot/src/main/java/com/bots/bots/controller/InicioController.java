@@ -3,7 +3,8 @@ package com.bots.bots.controller;
 import java.io.IOException;
 import java.util.HashMap;
 
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +21,9 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 
 @Controller
 public class InicioController {
-	private AdminMensajes adminmensajes =  new AdminMensajes();
+	@Autowired
+	@Qualifier("adminMensajes")
+	private AdminMensajes adminmensajes;
 		
 	@RequestMapping(method = RequestMethod.GET, value = "/webhook")
     @ResponseBody

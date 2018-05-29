@@ -45,19 +45,11 @@ public class AccionesMensajes extends AccionesAPI{
 	
 	protected boolean getValidaDatosTransferencia(String texto){
 		String[] datosTransfer = texto.split(" ");
-		return verifyStringToNumber( datosTransfer[0] ) && verifyStringToNumber( datosTransfer[2] ) ? true : false; 
+		return Resources.verifyStringToNumber( datosTransfer[0] ) 
+				&& Resources.verifyStringToNumber( datosTransfer[1] ) 
+				&& Resources.verifyStringToNumber( datosTransfer[2] )
+				&& Resources.verifyStringToDecimal( datosTransfer[3] ) ? true : false; 
 	}
-    
-    protected boolean verifyStringToNumber(String cuenta) {
-    	LOGGER.info("Ejecucion: verifyStringToNumber(String)");
-    	
-		boolean verificador = true;
-		for(char caracter : cuenta.toCharArray())	
-			if(!Character.isDigit(caracter)) 
-				verificador = false;
-		
-		return verificador;
-    }
     
     protected Usuarios getUsuario(MessageReceivedWebhook message){
     	LOGGER.info("Ejecucion: getUsuario(MessageReceivedWebhook)");

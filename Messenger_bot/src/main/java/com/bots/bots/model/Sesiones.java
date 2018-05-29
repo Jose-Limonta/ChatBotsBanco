@@ -6,6 +6,7 @@ import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -35,6 +36,9 @@ public class Sesiones implements Serializable{
     private Date fecha;
     @Column(name = "registro")
     private Short registro;
+    @Lob
+    @Column(name = "notarjeta")
+    private String notarjeta;
 
     public Sesiones() {
     }
@@ -80,7 +84,15 @@ public class Sesiones implements Serializable{
         this.registro = registro;
     }
 
-    @Override
+    public String getNotarjeta() {
+		return notarjeta;
+	}
+
+	public void setNotarjeta(String notarjeta) {
+		this.notarjeta = notarjeta;
+	}
+
+	@Override
     public int hashCode() {
         int hash = 0;
         hash += (idSesion != null ? idSesion.hashCode() : 0);
@@ -99,7 +111,7 @@ public class Sesiones implements Serializable{
 	@Override
 	public String toString() {
 		return "Sesiones [idSesion=" + idSesion + ", accion=" + accion + ", fecha=" + fecha + ", registro=" + registro
-				+ "]";
+				+ ", notarjeta=" + notarjeta + "]";
 	}
 
 }

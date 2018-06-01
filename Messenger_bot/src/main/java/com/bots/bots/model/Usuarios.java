@@ -8,16 +8,22 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "usuarios", catalog = "bots", schema = "")
+@XmlRootElement
+@NamedQueries({
+    @NamedQuery(name = "Usuarios.findAll", query = "SELECT u FROM Usuarios u")})
 public class Usuarios implements Serializable{
     
 	private static final long serialVersionUID = 1L;
@@ -33,7 +39,7 @@ public class Usuarios implements Serializable{
     @Column(name = "iduser")
     private String iduser;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "iduser")
-    @JsonManagedReference
+    //@JsonManagedReference
     private List<Tarjetas> tarjetasList;
 
     public Usuarios() {

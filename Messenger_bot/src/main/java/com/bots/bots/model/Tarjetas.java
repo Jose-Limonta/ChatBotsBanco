@@ -10,10 +10,13 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -21,6 +24,9 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "tarjetas", catalog = "bots", schema = "")
+@XmlRootElement
+@NamedQueries({
+    @NamedQuery(name = "Tarjetas.findAll", query = "SELECT t FROM Tarjetas t")})
 public class Tarjetas implements Serializable{
     
 	private static final long serialVersionUID = 1L;
@@ -40,10 +46,10 @@ public class Tarjetas implements Serializable{
     private String ttarjeta;
     @JoinColumn(name = "iduser", referencedColumnName = "iduser")
     @ManyToOne(optional = false)
-    @JsonBackReference
+    //@JsonBackReference
     private Usuarios iduser;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "ndtarjeta")
-    @JsonManagedReference
+    //@JsonManagedReference
     private List<Transacciones> transaccionesList;
 
     public Tarjetas() {

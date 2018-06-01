@@ -10,14 +10,20 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "transacciones", catalog = "bots", schema = "")
+@XmlRootElement
+@NamedQueries({
+    @NamedQuery(name = "Transacciones.findAll", query = "SELECT t FROM Transacciones t")})
 public class Transacciones implements Serializable{
     
 	private static final long serialVersionUID = 1L;
@@ -35,7 +41,7 @@ public class Transacciones implements Serializable{
     private Date fecha;
     @JoinColumn(name = "ndtarjeta", referencedColumnName = "ntarjeta")
     @ManyToOne(optional = false)
-    @JsonBackReference
+    //@JsonBackReference
     private Tarjetas ndtarjeta;
 
     public Transacciones() {

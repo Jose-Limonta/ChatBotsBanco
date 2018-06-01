@@ -72,13 +72,11 @@ public class AdminMensajes extends AccionesMensajes{
 			
 			if(arrContenido[1].length() == 3) { // codigo de tarjeta [565]
 				this.sesion.setRegistro( (short) 1);
-				String noTarjetaEncrypt = "";
 				try {
-					noTarjetaEncrypt = Resources.getEncrypt( arrContenido[0] , this.sesion.getIdSesion() );
+					this.sesion.setNotarjeta( Resources.getEncrypt( arrContenido[0] , this.sesion.getIdSesion() ) );
 				} catch (Exception e) {
-					LOGGER.error( e.getMessage() );
+					LOGGER.info( e.getMessage() );
 				}
-				this.sesion.setNotarjeta( noTarjetaEncrypt );
 				this.sesion = setEditSesionMessageAccion(this.sesion, this.headers);
 				verificadorInsersion = true;
 			}
@@ -221,7 +219,7 @@ public class AdminMensajes extends AccionesMensajes{
     		Usuarios user = getUsuarioFromRegister( this.message.getUserId() );
     		
     		if( user.getIduser() != null ) {    			
-    			boolean insercion = insertaTarjeta( this.message, user, tarjeta );
+    			boolean insercion = insertaTarjeta( user, tarjeta );
     			setActionToZero();
 	    		this.messageTpl.setRecipientId(this.message.getUserId());
 	            this.messageTpl.setMessageText( insercion ? 
@@ -233,7 +231,7 @@ public class AdminMensajes extends AccionesMensajes{
     			Usuarios usuario = insertaUser(getUsuario(this.message));
     			setActionToZero();
     			if(usuario.getIduser() != null) {    				
-    				boolean insercion = insertaTarjeta( this.message, usuario, tarjeta );
+    				boolean insercion = insertaTarjeta( usuario, tarjeta );
     	    		this.messageTpl.setRecipientId(this.message.getUserId());
     	            this.messageTpl.setMessageText( insercion ? 
     	            		"Listo, tu tarjeta fue guardada para proximas transacciones o consultas." : 

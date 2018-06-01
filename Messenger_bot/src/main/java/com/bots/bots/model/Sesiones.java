@@ -38,7 +38,7 @@ public class Sesiones implements Serializable{
     private Short registro;
     @Lob
     @Column(name = "notarjeta")
-    private String notarjeta;
+    private byte[] notarjeta;
 
     public Sesiones() {
     }
@@ -84,11 +84,11 @@ public class Sesiones implements Serializable{
         this.registro = registro;
     }
 
-    public String getNotarjeta() {
+    public byte[] getNotarjeta() {
 		return notarjeta;
 	}
 
-	public void setNotarjeta(String notarjeta) {
+	public void setNotarjeta(byte[] notarjeta) {
 		this.notarjeta = notarjeta;
 	}
 

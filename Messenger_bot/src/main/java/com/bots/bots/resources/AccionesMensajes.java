@@ -26,9 +26,9 @@ public class AccionesMensajes extends AccionesAPI{
 		return CONSULTA;
 	}
 	
-	protected boolean insertaTarjeta(MessageReceivedWebhook message, Usuarios user, String tarjeta) throws UnirestException  {		
-		LOGGER.info("Ejecucion: insertaTarjeta(MessageReceivedWebhook, Usuarios, String)");		
-		Tarjetas objtarjeta = getTarjeta(message, tarjeta, user);
+	public boolean insertaTarjeta(Usuarios user, String tarjeta) throws UnirestException  {		
+		LOGGER.info("Ejecucion: insertaTarjeta(Usuarios, String)");		
+		Tarjetas objtarjeta = getTarjeta(tarjeta, user);
 		if( objtarjeta.getNtarjeta() != null ) {	    			
 			Map<Object,Object> tarjetaAgregada = setTarjeta(objtarjeta);
 			if(!tarjetaAgregada.isEmpty()) 
@@ -37,13 +37,13 @@ public class AccionesMensajes extends AccionesAPI{
 		return false;
     }
     
-	protected Usuarios insertaUser(Usuarios usuario) throws UnirestException  {
+	public Usuarios insertaUser(Usuarios usuario) throws UnirestException  {
 		LOGGER.info("Ejecucion: insertaUser(Usuarios)");
     	Map<Object,Object> usuarioAgregado = setUsuarios(usuario);
     	return usuarioAgregado.isEmpty() ? new Usuarios() : convertMapToUsuarios(usuarioAgregado);
     }
 	
-	protected boolean getValidaDatosTransferencia(String texto){
+	public boolean getValidaDatosTransferencia(String texto){
 		String[] datosTransfer = texto.split(" ");
 		return Resources.verifyStringToNumber( datosTransfer[0] ) 
 				&& Resources.verifyStringToNumber( datosTransfer[1] ) 
@@ -59,8 +59,8 @@ public class AccionesMensajes extends AccionesAPI{
     			message.getPageId() );
     }
     
-    protected Tarjetas getTarjeta(MessageReceivedWebhook message, String tarjeta, Usuarios iduser) throws UnirestException  {
-    	LOGGER.info("Ejecucion: getTarjeta(MessageReceivedWebhook, String, Usuarios)");
+    public Tarjetas getTarjeta(String tarjeta, Usuarios iduser) throws UnirestException  {
+    	LOGGER.info("Ejecucion: getTarjeta(String, Usuarios)");
     	if(iduser != null && !tarjeta.isEmpty()) {
     		Tarjetas objtarjeta = new Tarjetas();
 	    	String ttarjeta  = getTipoTarjeta( tarjeta.substring(0, 1) );
@@ -76,10 +76,10 @@ public class AccionesMensajes extends AccionesAPI{
     	return new Tarjetas();
     }
     
-    protected String getTipoTarjeta(String tarjeta) {
+    public String getTipoTarjeta(String tarjeta) {
     	LOGGER.info("Ejecucion: getTipoTarjeta(String)");
     	int posision = Integer.parseInt( tarjeta.substring(0, 1) );
-    	return tipoTarjetasAv[ posision ];
+    	return posision > 8 ? "Tarjeta Inválida" : tipoTarjetasAv[ posision ];
     }
     
     protected Usuarios getUsuarioFromRegister(String clave) throws UnirestException  {

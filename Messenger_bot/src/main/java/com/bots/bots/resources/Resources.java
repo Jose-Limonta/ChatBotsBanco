@@ -44,8 +44,13 @@ public class Resources {
     	return String.valueOf(value);
     }
 	
-	public static boolean verifyStringToDecimal(Object content) {
-		return content instanceof Double || content instanceof Long ? true :  false;
+	public static boolean verifyStringToDecimal(String content) {
+		try {
+			Double.parseDouble(content);
+			return true;
+		}catch(NumberFormatException ex) {
+			return false;
+		}
 	}
     
 	public static boolean verifyStringToNumber(String cuenta) {
@@ -59,7 +64,7 @@ public class Resources {
 		return verificador;
     }
 	
-	public static String getEncrypt(String numtarjeta, String iduser) throws Exception {
+	public static byte[] getEncrypt(String numtarjeta, String iduser) throws Exception {
 		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
         keyGenerator.init(128);
         Key key = keyGenerator.generateKey();
@@ -67,12 +72,7 @@ public class Resources {
         Cipher aes = Cipher.getInstance("AES/ECB/PKCS5Padding");
         
         aes.init(Cipher.ENCRYPT_MODE, key);
-        byte[] encriptado = aes.doFinal( numtarjeta.getBytes() );
-        StringBuilder buffer = new StringBuilder();
-        for (byte b : encriptado) {
-        	buffer.append(Integer.toHexString(0xFF & b));
-        }
-        return buffer.toString();
+        return aes.doFinal( numtarjeta.getBytes() );
 	}
 	
 	public static String getDEncrypt(byte[] encriptado, String idUser) throws Exception{

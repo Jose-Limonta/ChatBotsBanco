@@ -9,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.bots.bots.model.Sesiones;
 import com.bots.bots.model.Tarjetas;
+import com.bots.bots.model.Transacciones;
 import com.bots.bots.model.Usuarios;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,6 +37,12 @@ public class AccionesAPI {
 		return convertMapToSesiones(mapa, headers);
 	}
 
+	public Tarjetas getTarjetaAPI(String tarjeta, Map<String, Object> headers) throws UnirestException {
+		Map<Object, Object> mapa = getOnlyOneMapFromHttpResponse(Constantes.URL_TARJETAS + tarjeta);
+		LOGGER.info("GET Mapa: " +  mapa );
+		return convertMapToTarjetas(mapa, headers);
+	}
+
 	public Map<Object, Object> setAddSesion(Sesiones sesion) throws UnirestException {
 		return setAPIAction(sesion, Constantes.URL_SESIONES, "post");
 	}
@@ -47,7 +54,7 @@ public class AccionesAPI {
 	public Map<Object, Object> setTarjeta(Tarjetas tarjeta) throws UnirestException {
 		LOGGER.info("Método en ejecución: setTarjeta(Tarjetas)");
 		return tarjeta.getNtarjeta() != null && !tarjeta.getNtarjeta().isEmpty()
-				? setAPIAction(tarjeta, Constantes.URL_TARJETASICN, "post")
+				? setAPIAction(tarjeta, Constantes.URL_TARJETAS, "post")
 				: new HashMap<>();
 	}
 
@@ -55,6 +62,13 @@ public class AccionesAPI {
 		LOGGER.info("Método en ejecución: setUsuarios(Usuarios)");
 		return user.getIduser() != null && !user.getIduser().isEmpty()
 				? setAPIAction(user, Constantes.URL_USUARIOS, "post")
+				: new HashMap<>();
+	}
+
+	public Map<Object, Object> setTransaccion(Transacciones transaccion) throws UnirestException {
+		LOGGER.info("Método en ejecución: setTransaccion(Transacciones)");
+		return transaccion != null && transaccion.getNdtarjeta() != null
+				? setAPIAction(transaccion, Constantes.URL_TRANSACCIONES, "post")
 				: new HashMap<>();
 	}
 
@@ -80,11 +94,27 @@ public class AccionesAPI {
 		return ms.getClassOfMap(new Usuarios());
 	}
 
+	public Tarjetas convertMapToTarjetas(Map<Object, Object> mapa, Map<String, Object> headers) {
+		if (mapa.isEmpty())
+			return new Tarjetas();
+		LOGGER.info("convertMapToTarjetas(Map<Object, Object>, " + mapa + " Map<String, Object> " + headers + " )");
+		MapToClass<Tarjetas> mapToClass = new MapToClass<>(mapa, headers);
+		return mapToClass.getClassOfMap(new Tarjetas());
+	}
+
 	public Sesiones convertMapToSesiones(Map<Object, Object> mapa, Map<String, Object> headers) {
 		if (mapa.isEmpty())
 			return new Sesiones();
 		MapToClass<Sesiones> ms = new MapToClass<>(mapa, headers);
 		return ms.getClassOfMap(new Sesiones());
+	}
+
+	public Transacciones convertMapToTransacciones(Map<Object, Object> mapa, Map<String, Object> headers) {
+		if (mapa.isEmpty())
+			return new Transacciones();
+
+		MapToClass<Transacciones> mapToClass = new MapToClass<>(mapa, headers);
+		return mapToClass.getClassOfMap(new Transacciones());
 	}
 
 	private Map<Object, Object> getOnlyOneMapFromHttpResponse(String url) throws UnirestException {
@@ -116,9 +146,8 @@ public class AccionesAPI {
 
 		if (response.getBody() == null)
 			return new HashMap<>();
-		
-		LOGGER.info( response.getBody() );
 
+		LOGGER.info(response.getBody());
 		if (!response.getBody().isEmpty() && response.getStatus() == 200) {
 			Response classResponse = new Response(response.getBody());
 			return classResponse.getMapResponseOnlyOne();

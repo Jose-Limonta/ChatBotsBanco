@@ -1,5 +1,7 @@
 package com.bots.bots.resources;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -7,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.bots.bots.model.Sesiones;
 import com.bots.bots.model.Tarjetas;
+import com.bots.bots.model.Transacciones;
 import com.bots.bots.model.Usuarios;
 import com.clivern.racter.receivers.webhook.MessageReceivedWebhook;
 import com.mashape.unirest.http.exceptions.UnirestException;
@@ -42,6 +45,24 @@ public class AccionesMensajes extends AccionesAPI{
     	Map<Object,Object> usuarioAgregado = setUsuarios(usuario);
     	return usuarioAgregado.isEmpty() ? new Usuarios() : convertMapToUsuarios(usuarioAgregado);
     }
+	
+	public Transacciones insertaTransaccion(Transacciones transaccion) throws UnirestException {
+		Map<Object,Object> transaccionAdd = setTransaccion( transaccion );
+		return transaccionAdd.isEmpty() 
+				? new Transacciones() 
+						: convertMapToTransacciones(transaccionAdd, getMapOfHeadersT() );
+	}
+	
+	private Map<String,Object> getMapOfHeadersT(){
+		Map<String,Object> headersT = new HashMap<>();
+		int valorInicialInt = 0;
+		headersT.put("idtransaccion", new Integer( valorInicialInt ) );
+		headersT.put("fecha", new Date());
+		headersT.put("ndtarjeta", new Tarjetas() );
+		headersT.put("iduser", new Usuarios() );
+		
+		return headersT;
+	}
 	
 	public boolean getValidaDatosTransferencia(String texto){
 		String[] datosTransfer = texto.split(" ");
@@ -82,7 +103,7 @@ public class AccionesMensajes extends AccionesAPI{
     	return posision > 8 ? "Tarjeta Inválida" : tipoTarjetasAv[ posision ];
     }
     
-    protected Usuarios getUsuarioFromRegister(String clave) throws UnirestException  {
+    public Usuarios getUsuarioFromRegister(String clave) throws UnirestException  {
     	LOGGER.info("Ejecucion: getUsuarioFromRegister(String)");
     	Map<Object,Object> mapausuario = getClienteByClave(clave);
     	return mapausuario.isEmpty() ? new Usuarios() : convertMapToUsuarios( mapausuario ); 
@@ -91,6 +112,11 @@ public class AccionesMensajes extends AccionesAPI{
     protected Sesiones getSesion(String clave, Map<String, Object> headers) throws UnirestException {
     	Sesiones sesion = getSesiones(clave, headers);
     	return sesion != null && sesion.getIdSesion() != null ? sesion : new Sesiones();    	
+    }
+    
+    public Tarjetas getTarjetaAccion(String clave, Map<String,Object> headers) throws UnirestException {
+    	Tarjetas tarjeta = getTarjetaAPI(clave, headers);
+    	return tarjeta != null && tarjeta.getNtarjeta() != null ? tarjeta : new Tarjetas();
     }
     
     protected Sesiones setAddSesionMessageAccion(Sesiones sesion, Map<String, Object> headers) throws UnirestException  {

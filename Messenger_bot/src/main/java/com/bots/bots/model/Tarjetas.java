@@ -19,8 +19,7 @@ import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "tarjetas", catalog = "bots", schema = "")
@@ -46,10 +45,9 @@ public class Tarjetas implements Serializable{
     private String ttarjeta;
     @JoinColumn(name = "iduser", referencedColumnName = "iduser")
     @ManyToOne(optional = false)
-    //@JsonBackReference
     private Usuarios iduser;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "ndtarjeta")
-    //@JsonManagedReference
+    @JsonIgnore
     private List<Transacciones> transaccionesList;
 
     public Tarjetas() {

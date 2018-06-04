@@ -1,13 +1,17 @@
 package com.bots.bots;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.bots.bots.model.Tarjetas;
+import com.bots.bots.model.Transacciones;
 import com.bots.bots.model.Usuarios;
 import com.bots.bots.resources.AccionesMensajes;
 import com.bots.bots.resources.Resources;
@@ -15,6 +19,7 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 
 public class AccionesMensajesTest extends Assert{
 	
+	private static final Log LOGGER = LogFactory.getLog(AccionesMensajesTest.class);	
 	private AccionesMensajes accionesMensaje = new AccionesMensajes();
 	private Usuarios objUsuario;
 	
@@ -81,6 +86,25 @@ public class AccionesMensajesTest extends Assert{
 		boolean verifyTypeTrue = typeTarjetaTrue.contains("Industria");
 		assertTrue(verifyTypeFalse);
 		assertTrue(verifyTypeTrue);
+	}
+	
+	@Test
+	public void getUsuarioFromRegister() throws UnirestException  {
+		Usuarios userFromNull = accionesMensaje.getUsuarioFromRegister("595734985734874");
+		assertNotNull( userFromNull ); // no existe assertNotNull en caso de que sea exitoso
+	}
+	
+	@Test
+	public void insertaTransaccion() throws UnirestException {
+		Map<String, Object> headersTarjeta = new HashMap<>();
+		headersTarjeta.put("fecha", new Date() );
+		headersTarjeta.put("iduser", new Usuarios() );
+		
+		Tarjetas tarjeta = accionesMensaje.getTarjetaAccion("57439847792387", headersTarjeta);
+		LOGGER.info( tarjeta );
+		Transacciones transaccion = accionesMensaje.insertaTransaccion( new Transacciones( "454534", new Date(), tarjeta ) );
+		LOGGER.info( transaccion );
+		assertNotNull( transaccion );
 	}
 	
 }

@@ -17,7 +17,7 @@ import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "usuarios", catalog = "bots", schema = "")
@@ -39,7 +39,7 @@ public class Usuarios implements Serializable{
     @Column(name = "iduser")
     private String iduser;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "iduser")
-    //@JsonManagedReference
+    @JsonIgnore
     private List<Tarjetas> tarjetasList;
 
     public Usuarios() {

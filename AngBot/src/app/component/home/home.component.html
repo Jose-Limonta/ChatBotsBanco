@@ -1,0 +1,31 @@
+<div class="container">
+  <div class="row">
+    <div class="col-sm"></div>
+    <div class="col-sm">
+
+      <h1>Angular Bot</h1>
+
+      <ng-container *ngFor="let message of messages | async">
+
+        <div class="message" [ngClass]="{ 'from': message.origen === 'bot',
+                                          'to':   message.origen === 'user' }">
+          {{ message.texto }}
+          <p class="message-data"> {{ message.fecha }} </p>
+        </div>
+
+      </ng-container>
+
+
+      <label for="nameField">Mensaje : </label>
+
+
+      <input [(ngModel)]="formValue" (keyup.enter)="sendMessage()" type="text">
+
+      <button class="btn btn-primary send-btn" (click)="sendMessage()">Send</button>
+
+    </div>
+    <div class="col-sm"></div>
+  </div>
+</div>
+
+

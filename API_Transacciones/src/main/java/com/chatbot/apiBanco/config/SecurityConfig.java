@@ -42,7 +42,13 @@ public class SecurityConfig extends  WebSecurityConfigurerAdapter{
     }
 
     @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) {
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+
+        auth.inMemoryAuthentication()
+                .passwordEncoder(passwordEncoder())
+                .withUser("pepe")
+                .password(passwordEncoder().encode("pepe"))
+                .roles("chatbot");
 
         authuserRepo.findAll().forEach(
                 (e) -> {

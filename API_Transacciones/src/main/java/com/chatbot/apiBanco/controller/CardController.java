@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import com.chatbot.apiBanco.model.error.Error;
 
 import java.util.Calendar;
-import java.util.List;
+    import java.util.List;
 
 @RestController
 public class CardController {
@@ -73,6 +73,20 @@ public class CardController {
         request.offset(0);
 
         return  API.cards().list(dates.getCustomerId(), request);
+    }
+
+    @RequestMapping(value = "/v1/cards/{id}",  method = RequestMethod.GET)
+    @ResponseBody
+    public List<Card>  getListTarjetas(@PathVariable String id) throws OpenpayServiceException, ServiceUnavailableException {
+        dateGte.set(0, Calendar.JANUARY, 1, 0, 0,0);
+        dateLte.set(2019, Calendar.JANUARY, 1, 0, 0, 0);
+
+        SearchParams request = new SearchParams();
+        request.creationGte(dateGte.getTime());
+        request.creationLte(dateLte.getTime());
+        request.offset(0);
+
+        return  API.cards().list(id, request);
     }
 
     @ExceptionHandler({ OpenpayServiceException.class })

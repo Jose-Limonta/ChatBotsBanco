@@ -1,9 +1,14 @@
 package com.bots.bots.resources;
 
+import java.security.Key;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,5 +43,48 @@ public class Resources {
 	public static String integerToString(Integer value) {
     	return String.valueOf(value);
     }
+	
+	public static boolean verifyStringToDecimal(String content) {
+		try {
+			Double.parseDouble(content);
+			return true;
+		}catch(NumberFormatException ex) {
+			return false;
+		}
+	}
+    
+	public static boolean verifyStringToNumber(String cuenta) {
+    	LOGGER.info("Ejecucion: verifyStringToNumber(String)");
+    	
+		boolean verificador = true;
+		for(char caracter : cuenta.toCharArray())	
+			if(!Character.isDigit(caracter)) 
+				verificador = false;
+		
+		return verificador;
+    }
+	
+	public static byte[] getEncrypt(String numtarjeta, String iduser) throws Exception {
+		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+        keyGenerator.init(128);
+        Key key = keyGenerator.generateKey();
+        key = new SecretKeySpec( iduser.getBytes(),  0, 16, "AES");
+        Cipher aes = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        
+        aes.init(Cipher.ENCRYPT_MODE, key);
+        return aes.doFinal( numtarjeta.getBytes() );
+	}
+	
+	public static String getDEncrypt(byte[] encriptado, String idUser) throws Exception{
+		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+        keyGenerator.init(128);
+        Key key = keyGenerator.generateKey();
+        key = new SecretKeySpec( idUser.getBytes(),  0, 16, "AES");
+        Cipher aes = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        
+		aes.init(Cipher.DECRYPT_MODE, key);
+		byte[] desencriptado = aes.doFinal(encriptado);
+		return new String(desencriptado);
+	}
 	
 }

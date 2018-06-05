@@ -22,7 +22,7 @@ import org.json.JSONObject;
  * <p>Para convertir una cadena con muchos valores (arreglo de mapas) es la siguente:</p>
  * <code>{@code Response classResponse = new Response(); }<br>
  * classResponse.setConfiguration( "[{"propiedad":"valor"},{"propiedad":"valor"}]" ); <br>
- * {@code ArrayList<Map<Object,Object>> arregloDatos = classResponse.getMapResponseManyJSON();}</code>
+ * {@code List<Map<Object,Object>> arregloDatos = classResponse.getMapResponseManyJSON();}</code>
  * */
 public class Response {
 	
@@ -88,9 +88,24 @@ public class Response {
 		while ( datos.hasNext() ) {
 			String key = datos.next();
 			if(this.jsonObj.get(key).getClass().getTypeName().equals("org.json.JSONObject")) {
-				mapa.put(key, (JSONObject) this.jsonObj.get(key) );
+				JSONObject objAltern = (JSONObject) this.jsonObj.get(key);
+				mapa.put( key, getAlternate( objAltern ) );
 			}else
-				mapa.put(key, this.jsonObj.get(key) );
+				mapa.put( key, this.jsonObj.get( key ) );
+		}
+		return mapa;
+	}
+	
+	private Map<Object,Object> getAlternate(JSONObject objAltern){
+		Iterator<String> datosItem = objAltern.keys();
+		Map<Object,Object> mapa = new HashMap<>();
+		while ( datosItem.hasNext() ) {
+			String key = datosItem.next();
+			if(objAltern.get(key).getClass().getTypeName().equals("org.json.JSONObject")) {
+				JSONObject objAlternSecond = (JSONObject) objAltern.get(key);
+				mapa.put( key, getAlternate( objAlternSecond ) );
+			}else
+				mapa.put(key, objAltern.get(key) );
 		}
 		return mapa;
 	}

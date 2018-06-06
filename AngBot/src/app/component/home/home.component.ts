@@ -19,6 +19,7 @@ export class HomeComponent implements OnInit {
   ngOnInit() {
     this.messages = this.chat.conversation.asObservable();
                     // .map((acc, val) => acc.concat(val) );
+                    // TODO check map
   }
 
   sendMessage() {

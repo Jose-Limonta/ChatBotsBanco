@@ -1,3 +1,4 @@
+import { BehaviorSubject, Observable } from 'rxjs';
 import { ApiService } from './api.service';
 import { GapiService } from './gapi.service';
 import { Injectable } from '@angular/core';
@@ -5,10 +6,8 @@ import { environment } from '../../environments/environment';
 
 import { ApiAiClient } from 'api-ai-javascript';
 
-import { Observable } from 'rxjs/Observable';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Message } from './../models/mensaje';
-import 'rxjs/add/operator/scan';
+
 
 @Injectable()
 export class DialogService {
@@ -17,14 +16,12 @@ export class DialogService {
 
   constructor (private client: GapiService, private openPay: ApiService) {}
 
-  // Sends and receives messages via DialogFlow
   converse(msg: string) {
     const userMessage = new Message(msg, 'user', new  Date().toLocaleString(), '');
     this.update(userMessage);
 
     return this.client.textRequest(msg)
                       .subscribe(
-                        // tslint:disable-next-line:no-shadowed-variable
                         data => {
                           const text = data.queryResult.fulfillmentMessages[0].text.text[0];
                           const intent = data.queryResult.intent.displayName;
@@ -42,8 +39,8 @@ export class DialogService {
     this.conversation.next([msg]);
   }
 
-  bankAction (intent: string){
-    if (intent === 'RevisarCuenta'){
+  bankAction (intent: string) {
+    if (intent === 'RevisarCuenta') {
       this.openPay.getResource('cards/a5g8bb6ev5bzva6jw1fu')
                   .subscribe(
                     data => {
@@ -54,7 +51,7 @@ export class DialogService {
                     error => console.log('Se presentó un error', error)
                   );
     } else {
-      console.log('Intent erroneo : '+ intent);
+      console.log('Intent erroneo : ' + intent);
     }
   }
 

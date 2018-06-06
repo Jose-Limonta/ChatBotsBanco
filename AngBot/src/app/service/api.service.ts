@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpEvent, HttpHandler, HttpInterceptor, HttpErrorResponse, HttpRequest, HttpHeaders } from '@angular/common/http';
 import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 import { Login } from '../models/login';
-import { Observable } from 'rxjs/Observable';
-import { catchError } from 'rxjs/operators/catchError';
+import { Observable } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -44,6 +44,10 @@ export class ApiService {
     }
     return new ErrorObservable(
       'Something bad happened; please try again later.');
+  }
+
+  public setActionUrl(url: string) {
+    this.actionUrl = url;
   }
 
 }

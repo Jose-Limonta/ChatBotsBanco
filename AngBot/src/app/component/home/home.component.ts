@@ -1,7 +1,6 @@
 import { DialogService } from './../../service/dialog.service';
-import { Observable } from 'rxjs/Observable';
+import { Observable ,  BehaviorSubject } from 'rxjs';
 import { ApiService } from './../../service/api.service';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Component, OnInit } from '@angular/core';
 import { Message } from './../../models/mensaje';
 
@@ -18,8 +17,8 @@ export class HomeComponent implements OnInit {
   constructor(private api: ApiService, private chat: DialogService) { }
 
   ngOnInit() {
-    this.messages = this.chat.conversation.asObservable()
-                    .scan((acc, val) => acc.concat(val) );
+    this.messages = this.chat.conversation.asObservable();
+                    // .map((acc, val) => acc.concat(val) );
   }
 
   sendMessage() {

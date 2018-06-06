@@ -1,51 +1,52 @@
-import { QueryInput, QueryParams } from './../models/googleData';
+import { Observable } from 'rxjs';
+import { QueryInput, QueryParams, Key, GoogleData } from './../models/googleData';
 import { ApiService } from './api.service';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { catchError } from 'rxjs/operators/catchError';
-import { GoogleData } from '../models/googleData';
-import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
-
-const httpOptions = {
-  headers: new HttpHeaders({
-    // tslint:disable-next-line:max-line-length
-    'Authorization': 'Bearer ya29.c.ElrMBZNyfBNI8PkWdw5k-8mJnfnGda2zuCCIAlKAB16RPP2oL2Mj-1L3hIG_eG942OxOQLyeMS2NKjNIuAC5gk5HPmp1Qw23rd5Dz8A6tV65aV0lf8O0yLjLHTA',
-    'Content-Type': 'application/json'
-  })
-};
+import { catchError } from 'rxjs/operators';
+import { GoogleResponse } from '../models/googleResponse';
 
 @Injectable()
-export class GapiService{
+export class GapiService {
 
   private actionUrl: string;
+  private httpOptions: {};
 
   constructor(private http: HttpClient) {
     // tslint:disable-next-line:max-line-length
-    this.actionUrl = 'https://dialogflow.googleapis.com/v2/projects/angbot-ab821/agent/sessions/955cf259-d479-453e-a50d-ac96f9bc00cf:detectIntent';
+    this.actionUrl = 'https://dialogflow.googleapis.com/v2/projects/angbot-ab821/agent/sessions/fbf255c2-16fe-9e7f-123f-addbb1cebab1:detectIntent';
+
+    this.getGcloudKey().subscribe(
+      data => {
+        console.log('Llave : ' + data);
+        this.httpOptions = {
+          headers: new HttpHeaders({
+            'Authorization': 'Bearer ' + data.key,
+            'Content-Type': 'application/json'
+          })
+        };
+      },
+      error => {
+        console.log('------ERROR---------');
+        console.log(error);
+      }
+    );
   }
 
-  textRequest(msg: string) {
-    const req: GoogleData = {queryInput: {text: { text: '', languageCode: ''}}, queryParams:{timeZone: ''} };
-    req.queryInput.text.text = msg;
-    req.queryInput.text.languageCode = navigator.language;
-    req.queryParams.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    console.log(req);
-    return this.http.post<GoogleData>(this.actionUrl, req, httpOptions)
-                .pipe(
-                  catchError( this.handleError  )
-                );
+  textRequest(msg: string): Observable<GoogleResponse> {
+
+    const req: GoogleData = {
+      queryInput: { text: { text: msg, languageCode: navigator.language } },
+      queryParams: { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }
+    };
+    // console.log('---------Google Request Data--------');
+    // console.log(req);
+    // console.log(this.httpOptions.headers);
+    return this.http.post<GoogleResponse>(this.actionUrl, req, this.httpOptions);
+
   }
 
-  public handleError(error: HttpErrorResponse){
-    if (error.error instanceof ErrorEvent) {
-      console.error('An error occurred:', error.error.message);
-    } else {
-      console.error(
-        `Backend returned code ${error.status}, ` +
-        `body was: ${error.error}`);
-    }
-    return new ErrorObservable(
-      'Something bad happened; please try again later.');
+  private getGcloudKey() {
+    return this.http.get('http://localhost:8085/key');
   }
-
 }

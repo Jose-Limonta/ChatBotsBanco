@@ -3,11 +3,8 @@ import { ApiService } from './api.service';
 import { GapiService } from './gapi.service';
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-
 import { ApiAiClient } from 'api-ai-javascript';
-
 import { Message } from './../models/mensaje';
-
 
 @Injectable()
 export class DialogService {

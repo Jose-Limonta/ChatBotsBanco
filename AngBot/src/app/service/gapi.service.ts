@@ -46,7 +46,7 @@ export class GapiService {
 
   }
 
-  private getGcloudKey() {
-    return this.http.get('http://localhost:8085/key');
+  private getGcloudKey(): Observable<Key> {
+    return this.http.get<Key>('http://localhost:8085/key');
   }
 }

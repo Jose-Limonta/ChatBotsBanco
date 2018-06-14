@@ -1,55 +1,47 @@
-import { BehaviorSubject, Observable } from 'rxjs';
-import { ApiService } from './api.service';
-import { GapiService } from './gapi.service';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { environment } from '../../environments/environment';
-import { ApiAiClient } from 'api-ai-javascript';
-import { Message } from './../models/mensaje';
+import { Message } from '../models/mensaje';
+import { of, Observable } from 'rxjs';
+import { BehaviorSubject} from 'rxjs-compat';
 
-@Injectable()
+
+const httpOptions = {
+  headers: new HttpHeaders({
+    'Access-Control-Allow-Origin': '*',
+    'Content-Type': 'application/json'
+  })
+};
+
+@Injectable({
+  providedIn: 'root'
+})
 export class DialogService {
-
   conversation = new BehaviorSubject<Message[]>([]);
 
-  constructor (private client: GapiService, private openPay: ApiService) {}
+  constructor(private http: HttpClient) {}
 
-  converse(msg: string) {
-    const userMessage = new Message(msg, 'user', new  Date().toLocaleString(), '');
-    this.update(userMessage);
-
-    return this.client.textRequest(msg)
-                      .subscribe(
-                        data => {
-                          const text = data.queryResult.fulfillmentMessages[0].text.text[0];
-                          const intent = data.queryResult.intent.displayName;
-                          const botMessage = new Message(text, 'bot', new  Date().toLocaleString(), intent);
-                          console.log(botMessage);
-                          this.bankAction(intent);
-                          this.update(botMessage);
-                        },
-                        error => console.log('Se presentó un error', error)
-                      );
-  }
-
-  // Adds message to source
   update(msg: Message) {
     this.conversation.next([msg]);
   }
 
-  bankAction (intent: string) {
-    if (intent === 'RevisarCuenta') {
-      this.openPay.getResource('cards/a5g8bb6ev5bzva6jw1fu')
-                  .subscribe(
-                    data => {
-                      const text = JSON.stringify(data);
-                      const botMessage = new Message(text, 'bot', new  Date().toLocaleString(), '');
-                      this.update(botMessage);
-                    },
-                    error => console.log('Se presentó un error', error)
-                  );
-    } else {
-      console.log('Intent erroneo : ' + intent);
-    }
+
+  converse(msg: string) {
+    const userMessage = new Message(msg, 'user', new  Date().toLocaleString(), 'tbd');
+    this.update(userMessage);
+
+    this.postMessage(userMessage).subscribe(
+      data => {
+        console.log(data);
+        const botMessage = new Message(data.Text, data.Origin, data.Date , data.Intent);
+        this.update(botMessage);
+      },
+      error => console.log('Se ha presentado un error inesperado')
+    );
+  }
+
+  postMessage (msg: Message): Observable<Message> {
+    const actionUrl = 'http://localhost:8085/message';
+    return this.http.post<Message>(actionUrl, msg);
   }
 
 }

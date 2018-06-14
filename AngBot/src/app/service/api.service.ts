@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 import { Login } from '../models/login';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { Message } from '../models/mensaje';
 
 const httpOptions = {
   headers: new HttpHeaders({

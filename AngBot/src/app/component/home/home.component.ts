@@ -1,5 +1,5 @@
 import { DialogService } from './../../service/dialog.service';
-import { Observable ,  BehaviorSubject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { ApiService } from './../../service/api.service';
 import { Component, OnInit } from '@angular/core';
 import { Message } from './../../models/mensaje';
@@ -17,9 +17,8 @@ export class HomeComponent implements OnInit {
   constructor(private api: ApiService, private chat: DialogService) { }
 
   ngOnInit() {
-    this.messages = this.chat.conversation.asObservable();
-                    // .map((acc, val) => acc.concat(val) );
-                    // TODO check map
+    this.messages = this.chat.conversation.asObservable()
+                      .scan( (acc, val) => acc.concat(val) );
   }
 
   sendMessage() {

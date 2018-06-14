@@ -1,4 +1,3 @@
-import { GapiService } from './service/gapi.service';
 import { ApiService } from './service/api.service';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
@@ -27,8 +26,7 @@ import { DialogService } from './service/dialog.service';
   ],
   providers: [
     ApiService,
-    DialogService,
-    GapiService
+    DialogService
   ],
   bootstrap: [AppComponent]
 })

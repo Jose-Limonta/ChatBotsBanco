@@ -1,10 +1,10 @@
 export class Message {
 
   constructor(
-    public texto: string,
-    public origen: string,
-    public fecha: string,
-    public intent: string
+    public Text: string,
+    public Origin: string,
+    public Date: string,
+    public Intent: string
   ) {  }
 
 }

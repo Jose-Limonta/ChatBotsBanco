@@ -7,10 +7,10 @@
 
       <ng-container *ngFor="let message of messages | async">
 
-        <div class="message" [ngClass]="{ 'from': message.origen === 'bot',
-                                          'to':   message.origen === 'user' }">
-          {{ message.texto }}
-          <p class="message-data"> {{ message.fecha }} </p>
+        <div class="message" [ngClass]="{ 'from': message.Origin === 'bot',
+                                          'to':   message.Origin === 'user' }">
+          {{ message.Text }}
+          <p class="message-data"> {{ message.Date }} </p>
         </div>
 
       </ng-container>

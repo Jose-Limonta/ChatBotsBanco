@@ -19,7 +19,6 @@ type Message struct {
 	Intent string `json:"Intent"`
 }
 
-// CORSRouterDecorator applies CORS headers to a mux.Router
 type CORSRouterDecorator struct {
     R *mux.Router
 }
@@ -38,9 +37,11 @@ func MessageHandler(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var message Message
 	err := decoder.Decode(&message)
+
 	if err != nil {
 		panic(err)
 	}
+
 	defer r.Body.Close()
 	log.Println(message)
 
